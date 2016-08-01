@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_hwcntl.h
- * @date         "Tue Jun 7 11:31:06 2016 +0800"
- * @commit       "e7339bb"
+ * @date         "Tue Jan 19 16:06:46 2016 +0800"
+ * @commit       "095cc98"
  *
  * @brief
  *
@@ -148,7 +148,7 @@ enum BSX4_SENSORLIST_INX
     SENSORLIST_INX_WAKEUP_WAKE_GESTURE = 55,
     SENSORLIST_INX_WAKEUP_GLANCE_GESTURE = 56,
     SENSORLIST_INX_WAKEUP_PICK_UP_GESTURE = 57,
-    SENSORLIST_INX_WAKEUP_WRIST_TILT_GESTURE = 58,
+    SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED_OFFSET = 58,
     SENSORLIST_INX_WAKEUP_GYROSCOPE_UNCALIBRATED_OFFSET = 59,
     SENSORLIST_INX_WAKEUP_POWER_CONSUMPTION = 60,
     SENSORLIST_INX_WAKEUP_ACTIVITY = 61,
@@ -189,14 +189,13 @@ enum BST_DEV_OP_MODE
 #define BSX_CONFSTR_25Hz   5
 #define BSX_CONFSTR_12_5Hz 6
 #define BSX_CONFSTR_6_25Hz 7
-#define BSX_CONFSTR_3_125Hz 8
-#define BSX_CONFSTR_1Hz    9
-#define BSX_CONFSTR_0_5Hz    10
-#define BSX_CONFSTR_0_25Hz    11
-#define BSX_CONFSTR_0_125Hz    12
-#define BSX_CONFSTR_0_0625Hz    13
-#define BSX_CONFSTR_0_03125Hz    14
-#define BSX_CONFSTR_0_015625Hz    15
+#define BSX_CONFSTR_1Hz    8
+#define BSX_CONFSTR_0_5Hz    9
+#define BSX_CONFSTR_0_25Hz    10
+#define BSX_CONFSTR_0_125Hz    11
+#define BSX_CONFSTR_0_0625Hz    12
+#define BSX_CONFSTR_0_03125Hz    13
+#define BSX_CONFSTR_0_015625Hz    14
 
 #define BSX_CONFSTR_UNITns 0x00  //00000000
 #define BSX_CONFSTR_UNITus 0x40  //01000000
@@ -204,13 +203,45 @@ enum BST_DEV_OP_MODE
 #define BSX_CONFSTR_UNITs  0xC0  //11000000
 
 
+#define CONVERT_DATARATE_CODE(code, rate) \
+    switch (code)\
+    {\
+        case BSX_CONFSTR_400Hz:\
+            rate = 400;\
+            break;\
+        case BSX_CONFSTR_200Hz:\
+            rate = 200;\
+            break;\
+        case BSX_CONFSTR_100Hz:\
+            rate = 100;\
+            break;\
+        case BSX_CONFSTR_50Hz:\
+            rate = 50;\
+            break;\
+        case BSX_CONFSTR_25Hz:\
+            rate = 25;\
+            break;\
+        case BSX_CONFSTR_12_5Hz:\
+            rate = 12.5;\
+            break;\
+        case BSX_CONFSTR_6_25Hz:\
+            rate = 6.25;\
+            break;\
+        case BSX_CONFSTR_1Hz:\
+            rate = 1;\
+            break;\
+        default:\
+            rate = 0;\
+    }\
+
+
 typedef struct
 {
-    uint8_t rate_code;
+    uint8_t data_rate;
     uint8_t latency_unit;
     uint16_t max_latency;
     uint16_t fifo_data_len;
-    float rate_Hz;
+    float delay_onchange_Hz;
 } BSX_SENSOR_CONFIG;
 
 typedef struct
@@ -221,7 +252,6 @@ typedef struct
 } BST_SENSORLIST;
 
 extern uint8_t HAL_ver[];
-extern const char *HAL_commit_id;
 extern struct sensor_t bst_all_sensors[SENSORLIST_INX_END];
 extern BST_SENSORLIST bst_sensorlist;
 
@@ -235,7 +265,7 @@ extern uint32_t active_wksensor_cnt;
 extern void get_sensor_t(int32_t sensor_id, struct sensor_t **pp_sensor_t, int32_t *p_list_inx);
 extern int activate_configref_resort(int32_t bsx_list_index, int32_t is_enable);
 extern int batch_configref_resort(int32_t bsx_list_index,
-                int64_t sampling_period_ns, int64_t max_report_latency_ns);
+                int64_t sampling_period_ns, int64_t max_report_latency_ns, float delay_Hz);
 extern int32_t convert_BSX_ListInx(int32_t bsx_list_inx);
 extern void open_input_by_name(const char *event_name, int *p_fd, int *p_num);
 extern void *hwcntl_main(void *arg);

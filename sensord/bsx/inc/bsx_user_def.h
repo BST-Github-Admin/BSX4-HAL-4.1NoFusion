@@ -99,11 +99,6 @@ extern "C"
 #define BSX_TRACE_ENTRY(object, event, id)
 #endif
 
-#ifdef BSX_DEVELOPMENT
-char_t bsx_artefact_identification;
-#endif
-
-
 #ifdef __cplusplus
 }
 #endif

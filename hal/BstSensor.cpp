@@ -161,6 +161,13 @@ BstSensor::BstSensor()
     tmplist_hwcntl_gyroraw = new BstSimpleList();
     tmplist_hwcntl_magnraw = new BstSimpleList();
 
+    /**
+     * Because hwcntl will also call algo library interface,
+     * so the initialization must be finished before creating threads
+     * BSX Lib initialization
+     * */
+    sensord_bsx_init();
+
     pthread_create(&thread_sensord, NULL, sensord_main, this);
 
     ret = hwcntl_init(this);

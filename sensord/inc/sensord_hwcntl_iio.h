@@ -74,9 +74,9 @@
  * Information nor for any infringement of patents or other rights of third
  * parties which may result from its use.
  *
- * @file         sensord_hwcntl_util.h
- * @date         "Mon Jun 20 16:27:56 2016 +0800"
- * @commit       "82918ef"
+ * @file         sensord_hwcntl_iio.h
+ * @date         "Fri Dec 11 10:40:18 2015 +0800"
+ * @commit       "4498a7f"
  *
  * @brief
  *
@@ -84,8 +84,85 @@
  *
  */
 
-#ifndef SENSORD_HWCNTL_UTIL_H_
-#define SENSORD_HWCNTL_UTIL_H_
+#ifndef SENSORD_HWCNTL_IIO_H_
+#define SENSORD_HWCNTL_IIO_H_
+
+/**
+ *
+ * @param name
+ * @param iio_dir
+ * @return
+ */
+#if !defined(UNIT_TEST_ACTIVE)
+static inline int get_IIOnum_by_name(const char *name, const char *iio_dir)
+{
+#define IIO_NAME_MAXLEN 30
+#define MAX_FILENAME_LEN 256
+    const char *type = "iio:device";
+    struct dirent *ent;
+    struct dirent dirent;
+    int number, numstrlen;
+
+    FILE *nameFile;
+    DIR *dp;
+    char thisname[IIO_NAME_MAXLEN];
+    char fname_buf[MAX_FILENAME_LEN+1];
+    int ret;
+
+    dp = opendir(iio_dir);
+    if (NULL == dp)
+    {
+        return -ENODEV;
+    }
+
+    while (!readdir_r(dp, &dirent, &ent) && NULL != ent)
+    {
+        if (0 == strcmp(ent->d_name, ".") ||
+                0 == strcmp(ent->d_name, "..") ||
+                strlen(ent->d_name) <= strlen(type) ||
+                0 != strncmp(ent->d_name, type, strlen(type)))
+        {
+            /*filter impossible dir names*/
+            continue;
+        }
+
+        numstrlen = sscanf(ent->d_name + strlen(type), "%d", &number);
+
+        /* verify the next character is not a colon */
+        if(0 == strncmp(ent->d_name + strlen(type) + numstrlen, ":", 1))
+        {
+            continue;
+        }
+
+        snprintf(fname_buf, MAX_FILENAME_LEN, "%s%s%d/name", iio_dir, type, number);
+
+        nameFile = fopen(fname_buf, "r");
+        if (!nameFile)
+        {
+            continue;
+        }
+
+        ret = fscanf(nameFile, "%s", thisname);
+        if(ret <= 0)
+        {
+            fclose(nameFile);
+            break;
+        }
+
+        if (0 == strcmp(name, thisname))
+        {
+            fclose(nameFile);
+            closedir(dp);
+            return number;
+        }
+
+        fclose(nameFile);
+    }
+
+    closedir(dp);
+    return -ENODEV;
+}
+#endif
 
 #define MAX_FILENAME_LEN 256
 
@@ -188,4 +265,4 @@ static inline int rd_sysfs_oneint(const char *filename, char *basedir, int *pval
 }
 
 
-#endif /* SENSORD_HWCNTL_UTIL_H_ */
+#endif /* SENSORD_HWCNTL_IIO_H_ */

@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_algo.h
- * @date         "Fri Jun 17 13:39:36 2016 +0800"
- * @commit       "8bf47ee"
+ * @date         "Fri Dec 11 10:40:18 2015 +0800"
+ * @commit       "4498a7f"
  *
  * @brief
  *
@@ -114,6 +114,8 @@ extern "C"
 #define BST_DLOG_ID_SUBSCRIBE_OUT BST_DLOG_ID_START
 #define BST_DLOG_ID_SUBSCRIBE_IN (BST_DLOG_ID_START+1)
 #define BST_DLOG_ID_DOSTEP (BST_DLOG_ID_START+2)
+#define BST_DLOG_ID_ABANDON (BST_DLOG_ID_START+3)
+#define BST_DLOG_ID_NEWSAMPLE (BST_DLOG_ID_START+4)
 
 extern int sensord_bsx_init(void);
 
@@ -122,10 +124,8 @@ extern bsx_return_t sensord_update_subscription(
                             bsx_sensor_configuration_t *const virtual_sensor_config_p,
                             bsx_u32_t *const n_virtual_sensor_config_p,
                             bsx_sensor_configuration_t *const physical_sensor_config_p,
-                            bsx_u32_t *const n_physical_sensor_config_p);
-extern void sensord_save_calib_profile();
-extern uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,
-        int32_t pre_data[3], int64_t *pre_tm, uint32_t counter);
-extern void sensord_resample_at_tm(float dataA[3], int64_t tmA, float dataB[3], int64_t tmB,
-        float dataS[3], int64_t tmS);
+                            bsx_u32_t *const n_physical_sensor_config_p,
+                            uint32_t cur_active_cnt);
+extern uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3], int64_t *pre_tm, uint32_t counter);
+
 #endif

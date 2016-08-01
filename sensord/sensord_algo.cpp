@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_algo.cpp
- * @date         "Thu Jun 30 11:36:05 2016 +0800"
- * @commit       "bc5b5a9"
+ * @date         "Fri Feb 5 15:40:38 2016 +0800"
+ * @commit       "666efb6"
  *
  * @brief
  *
@@ -100,6 +100,7 @@
 #include "sensord_hwcntl.h"
 #include "util_misc.h"
 
+
 #define CONVERT_ACC (0.0098) //library output is in mg = 0.0098 m/s^2
 #define CONVERT_GYRO (0.001065)
 #define CONVERT_MAG (0.1)
@@ -118,6 +119,24 @@ typedef struct
 } BSX_DATALOG_BUF;
 
 
+/*!
+ * @brief This function loads spec files from file system and set them into
+ *            bsx_init, after that it calls algo_adapter_init to set up
+ *            sensor_hw and working modes
+ *
+ * @param none
+ *
+ * @return 0 success, < 0 failed
+ */
+int sensord_bsx_init(void)
+{
+    return 0;
+}
+
+
+
+//declare i/p buffer
+/// accel data
 bsx_data_content_t accel_sli_in_xyz[3] =
 {
     {   .slli = 0},
@@ -159,6 +178,7 @@ bsx_fifo_data_t mag_in_data =
                 1, /* depth */
         };
 
+/// ang test data
 bsx_data_content_t ang_sli_in_xyz[3] =
 {
     {   .slli = 0},
@@ -180,7 +200,7 @@ bsx_fifo_data_t ang_in_data =
 
         };
 
-
+/// library input package
 static bsx_fifo_data_t library_in_package[3];
 
 
@@ -225,16 +245,24 @@ static void sort_input_samples(int8_t **pp_align_ind, uint32_t *p_len,
 
         if(ACC_hwdata_len)
         {
-            if(0 == cur_base_tm || (0 != cur_base_tm && pp_ACC_hwdata[acc_cur_index]->timestamp < cur_base_tm))
+            if(cur_base_tm)
             {
+                if(pp_ACC_hwdata[acc_cur_index]->timestamp < cur_base_tm){
+                    cur_base_tm = pp_ACC_hwdata[acc_cur_index]->timestamp;
+                }
+            }else{
                 cur_base_tm = pp_ACC_hwdata[acc_cur_index]->timestamp;
             }
         }
 
         if(MAG_hwdata_len)
         {
-            if(0 == cur_base_tm || (0 != cur_base_tm && pp_MAG_hwdata[mag_cur_index]->timestamp < cur_base_tm))
+            if(cur_base_tm)
             {
+                if(pp_MAG_hwdata[mag_cur_index]->timestamp < cur_base_tm){
+                    cur_base_tm = pp_MAG_hwdata[mag_cur_index]->timestamp;
+                }
+            }else{
                 cur_base_tm = pp_MAG_hwdata[mag_cur_index]->timestamp;
             }
         }
@@ -297,6 +325,7 @@ static void distory_hwdata(HW_DATA_UNION **pp_hwdata, uint32_t hwdata_len)
     free(pp_hwdata);
 }
 
+
 void sensord_algo_process(BstSensor *bstsensor)
 {
     uint32_t i;
@@ -313,8 +342,6 @@ void sensord_algo_process(BstSensor *bstsensor)
     int32_t MAG_hwdata_index;
     int32_t GYRO_hwdata_index;
 
-    bsx_return_t bsx_ret;
-    bsx_u32_t nOutput;
     char data_log_buf[256] = { 0 };
     uint32_t acc_has_input = 0;
     uint32_t mag_has_input = 0;
@@ -383,6 +410,7 @@ void sensord_algo_process(BstSensor *bstsensor)
         }
     }
 
+    //PDEBUG("Acc len: %u, Gyro len: %u, Mag len: %u", simple_listAccl->list_len, simple_listGyro->list_len, simple_listMagn->list_len);
 
     sort_input_samples(&p_align_ind, &align_ind_len,
             pp_ACC_hwdata, ACC_hwdata_len,
@@ -453,6 +481,13 @@ void sensord_algo_process(BstSensor *bstsensor)
 
         if(acc_has_input){
             library_in_package[input_package_index++] = accel_in_data;
+            PINFO("input ACC data: id=%u, D=%d, %d, %d T=%lld",
+                    accel_in_data.sensor_id,
+                    accel_in_data.content_p[0].lw.mslw.sli,
+                    accel_in_data.content_p[1].lw.mslw.sli,
+                    accel_in_data.content_p[2].lw.mslw.sli,
+                    accel_in_data.time_stamp);
+
             if(data_log){
                 acc_log_data.x = accel_in_data.content_p[0].lw.mslw.sli;
                 acc_log_data.y = accel_in_data.content_p[1].lw.mslw.sli;
@@ -473,6 +508,13 @@ void sensord_algo_process(BstSensor *bstsensor)
 
         if(mag_has_input){
             library_in_package[input_package_index++] = mag_in_data;
+            PINFO("input MAG data: id=%u, D=%d, %d, %d T=%lld",
+                    mag_in_data.sensor_id,
+                    mag_in_data.content_p[0].lw.mslw.sli,
+                    mag_in_data.content_p[1].lw.mslw.sli,
+                    mag_in_data.content_p[2].lw.mslw.sli,
+                    mag_in_data.time_stamp);
+
             if(data_log){
                 mag_log_data.x = mag_in_data.content_p[0].lw.mslw.sli;
                 mag_log_data.y = mag_in_data.content_p[1].lw.mslw.sli;
@@ -493,6 +535,13 @@ void sensord_algo_process(BstSensor *bstsensor)
 
         if(gyr_has_input){
             library_in_package[input_package_index++] = ang_in_data;
+            PINFO("input GYRO data: id=%u, D=%d, %d, %d T=%lld",
+                    ang_in_data.sensor_id,
+                    ang_in_data.content_p[0].lw.mslw.sli,
+                    ang_in_data.content_p[1].lw.mslw.sli,
+                    ang_in_data.content_p[2].lw.mslw.sli,
+                    ang_in_data.time_stamp);
+
             if(data_log){
                 gyr_log_data.x = ang_in_data.content_p[0].lw.mslw.sli;
                 gyr_log_data.y = ang_in_data.content_p[1].lw.mslw.sli;
@@ -519,6 +568,7 @@ void sensord_algo_process(BstSensor *bstsensor)
                     gyr_log_data.x, gyr_log_data.y, gyr_log_data.z, gyr_log_data.t);
             data_log_algo_input(data_log_buf);
         }
+
 
         {
             for (j = 0; j < input_package_index; ++j)
@@ -575,6 +625,7 @@ void sensord_algo_process(BstSensor *bstsensor)
 
     return;
 }
+
 
 uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3], int64_t *pre_tm, uint32_t counter)
 {
@@ -651,16 +702,41 @@ uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3],
 }
 
 
-void sensord_resample_at_tm(float dataA[3], int64_t tmA,
-        float dataB[3], int64_t tmB,
-        float dataS[3], int64_t tmS)
+#ifdef __cplusplus
+extern "C"
 {
-    int32_t i;
+#endif
 
-    for (i = 0; i < 3; ++i) {
-        dataS[i] = ( dataB[i] * (tmS - tmA) + dataA[i] * (tmB - tmS) ) / (tmB - tmA);
+void ladon_assert(int condition, char *file_name, char *function_name, int line_number, char *format_string_p, ...)
+{
+    if (!condition)
+    {
+        char message_buffer[1024];
+        va_list variable_argument_list_p;
+
+        va_start(variable_argument_list_p, format_string_p);
+        vsprintf(message_buffer, format_string_p, variable_argument_list_p);
+        va_end(variable_argument_list_p);
+
+        PLADON("Assertion failed in file [%s]\n at function %s on line %d with message:\n\"%s\"",
+               file_name, function_name, line_number, message_buffer);
     }
-
-    return;
 }
+
+void ladon_warning(char *file_name, char *function_name, int line_number, char *format_string_p, ...)
+{
+    char message_buffer[1024];
+    va_list variable_argument_list_p;
+
+    va_start(variable_argument_list_p, format_string_p);
+    vsprintf(message_buffer, format_string_p, variable_argument_list_p);
+    va_end(variable_argument_list_p);
+
+    PLADON("Warning issued in file [%s]\n at function %s on line %d with message:\n\"%s\"",
+           file_name, function_name, line_number, message_buffer);
+}
+
+#ifdef __cplusplus
+}
+#endif
 

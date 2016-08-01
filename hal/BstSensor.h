@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         BstSensor.h
- * @date         "Fri Jun 17 13:39:36 2016 +0800"
- * @commit       "8bf47ee"
+ * @date         "Fri Feb 5 15:40:38 2016 +0800"
+ * @commit       "666efb6"
  *
  * @brief
  *
@@ -126,7 +126,6 @@ public:
     void sensord_deliver_event(sensors_event_t *p_event);
 
     int send_flush_event(int32_t sensor_id);
-    void sensord_cleanup_remaining();
 
     int (*pfun_activate)(int handle, int enabled);
     int (*pfun_batch)(int handle, int flags, int64_t sampling_period_ns, int64_t max_report_latency_ns);

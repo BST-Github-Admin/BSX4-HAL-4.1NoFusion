@@ -55,8 +55,7 @@ LOCAL_CPPFLAGS := -pthread\
 
 LOCAL_LDLIBS += -lm -llog -lutils
 #LOCAL_SHARED_LIBRARIES := libm
-#LOCAL_LDFLAGS := 
-
+#LOCAL_LDFLAGS :=
 #LOCAL_LDFLAGS_arm :=
 #LOCAL_LDFLAGS_arm64 :=
 LOCAL_PRELINK_MODULE := false

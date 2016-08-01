@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_def.h
- * @date         "Fri Jun 17 13:39:36 2016 +0800"
- * @commit       "8bf47ee"
+ * @date         "Thu Aug 27 01:58:58 2015 -0400"
+ * @commit       "7184568"
  *
  * @brief
  *
@@ -90,9 +90,8 @@
 #if defined(__FASTEST_MODE_100HZ__)
 #define BST_SENSOR_MINDELAY_uS 10000
 #else
-#define BST_SENSOR_MINDELAY_uS 5000 /*200Hz*/
+#define BST_SENSOR_MINDELAY_uS 5000
 #endif
-#define BSX_SENSOR_MAXDELAY_uS 160000 /*6.25Hz*/
 
 /* this value depends on the reporting mode:
  *
@@ -126,23 +125,54 @@
 #define SENSOR_MAXDELAY_ONCHANGE 1800000000 //BSX4 library support maximum 1800s(1800000000us) delay
 
 #define BATCH_RSV_FRAME_COUNT 0
-#define BATCH_MAX_FRAME_COUNT 0
+#define BATCH_MAX_FRAME_COUNT 2000
 
 typedef struct
 {
     uint32_t id;
     union
     {
-        float data[6];
         struct
         {
             float x;
             float y;
             float z;
         };
+        struct
+        {
+            float azimuth;
+            float pitch;
+            float roll;
+        }; //for ORIENTATION
+        float pressure;
+        float temperature;
+        float data[4]; // for RV, Game RV, ALSH debug raw data
+        struct
+        {
+            float x_uncalib;
+            float y_uncalib;
+            float z_uncalib;
+            float x_bias;
+            float y_bias;
+            float z_bias;
+        }; //for GYROSCOPE/MAGNETIC UNCALIBRATED
         uint64_t step_counter;
+        struct
+        {
+            float heart_rate_bpm;
+            int8_t heart_rate_status;
+        };
+        float relative_humidity;
+        float ambient_temperature;
+        float light;
+        float proximity;
+
+        //ALSH private virtual sensor
+        int32_t power_consumption;
+        int32_t activity_wakeup;
     };
 
+    int8_t accuracy;
     int64_t timestamp;
 } HW_DATA_UNION;
 

@@ -91,7 +91,7 @@ extern "C"
 {
 #endif
 
-/*! @brief Retrieve the current version of BSX
+/*! @brief Retrieve the current version of the library
  *
  * @param[in,out]      bsx_version_p       Pointer to structure containing the version information
  *
@@ -99,17 +99,6 @@ extern "C"
  *  @retval BSX_OK
  */
 bsx_return_t bsx_get_version(bsx_version_t * bsx_version_p);
-
-/*! @brief Retrieve the current version of BSX as string
- *
- * @param[in,out]   ident_p         Returns the version identification in the provided buffer
- * @param[in,out]   n_ident_p       On input, size of the buffer; on output, actual used size of the buffer
- *
- * @return Zero when successful, otherwise an error code
- *  @retval BSX_OK
- *  @retval BSX_E_ABORT  The size of the buffer is too small.
- */
-bsx_return_t bsx_get_version_string(bsx_u8_t *ident_p, bsx_u32_t *n_ident_p);
 
 /*! @brief Initialize the library
  *

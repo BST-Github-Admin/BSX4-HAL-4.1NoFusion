@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_cfg.h
- * @date         "Thu Jul 14 14:23:25 2016 +0800"
- * @commit       "82ed88d"
+ * @date         "Tue Jan 26 11:14:07 2016 +0800"
+ * @commit       "c6abe62"
  *
  * @brief
  *
@@ -90,15 +90,29 @@
 extern int g_place_a;
 extern int g_place_m;
 extern int g_place_g;
+extern int solution_type;
 extern int accl_chip;
 extern int gyro_chip;
 extern int magn_chip;
 extern int accl_range;
+extern int algo_pass;
+extern int amsh_intr_pin;
+extern int amsh_calibration;
 extern int data_log;
 extern int bsx_datalog;
 extern int trace_level;
-extern int hardware_motion;
 extern int trace_to_logcat;
+extern long long unsigned int sensors_mask;
+
+#define SOLUTION_MDOF       0
+#define SOLUTION_ECOMPASS   1
+#define SOLUTION_IMU        2
+#define SOLUTION_M4G        3
+#define SOLUTION_ACC        4
+/* value is multiplexed with AP solutions, no conflicts*/
+#define SOLUTION_BMA4xy_android     0
+#define SOLUTION_BMA4xy_legacy      1
+#define SOLUTION_BMA4xy_default     2
 
 #define ACC_CHIP_BMI160      0
 #define ACC_CHIP_BMA2x2      1
@@ -110,9 +124,6 @@ extern int trace_to_logcat;
 #define MAG_CHIP_AKM09911    3
 #define MAG_CHIP_YAS537      4
 #define MAG_CHIP_YAS532      5
-#define MAG_CHIP_MMC         6
-#define MAG_CHIP_AKM09915    7
-#define MAG_CHIP_AKM09916    8
 
 #define ACC_CHIP_RANGCONF_2G   2
 #define ACC_CHIP_RANGCONF_4G   4

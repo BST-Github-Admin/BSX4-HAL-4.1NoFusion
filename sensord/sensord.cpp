@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord.cpp
- * @date         "Fri Jun 17 13:39:36 2016 +0800"
- * @commit       "8bf47ee"
+ * @date         "Fri Feb 5 15:40:38 2016 +0800"
+ * @commit       "666efb6"
  *
  * @brief
  *
@@ -222,36 +222,6 @@ int BstSensor::send_flush_event(int32_t sensor_id)
     return 0;
 }
 
-
-/*While disable and activate sensor in short time, the buffered samples and new samples will
- * introduce event gap. So clear buffered samples to eliminate that gap*/
-void BstSensor::sensord_cleanup_remaining()
-{
-    uint8_t buf_clean[1024];
-    int32_t ret = 0;
-
-    shmem_hwcntl.p_list->list_clean();
-    tmplist_hwcntl_acclraw->list_clean();
-    tmplist_hwcntl_magnraw->list_clean();
-    tmplist_hwcntl_gyroraw->list_clean();
-    tmplist_sensord_acclraw->list_clean();
-    tmplist_sensord_gyroraw->list_clean();
-    tmplist_sensord_magnraw->list_clean();
-    while(1){
-        ret = read(HALpipe_fd[0], buf_clean, sizeof(buf_clean));
-        if(0 == ret){
-            break;
-        }
-
-        if(ret < 0){
-            if(EAGAIN != errno){
-                /*EAGAIN == errno also means pipe is empty, it's returned when pipe_fd[1] is opened now*/
-                PWARN("clean pipe fail, errno = %d(%s)", errno, strerror(errno));
-            }
-            break;
-        }
-    }
-}
 
 /**
  * Only used in AP solution

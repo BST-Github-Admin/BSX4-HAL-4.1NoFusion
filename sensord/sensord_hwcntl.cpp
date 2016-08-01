@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_hwcntl.cpp
- * @date         "Thu Jun 30 11:36:05 2016 +0800"
- * @commit       "bc5b5a9"
+ * @date         "Tue Jan 26 11:14:07 2016 +0800"
+ * @commit       "c6abe62"
  *
  * @brief
  *
@@ -105,8 +105,7 @@
 #include "sensord_algo.h"
 #include "util_misc.h"
 
-uint8_t HAL_ver[4] = { 4, 0, 38, 0 };
-const char *HAL_commit_id = "Unknown";
+uint8_t HAL_ver[4] = { 4, 0, 0, 32 };
 
 #define UNUSED_SENSOR_T(sensor_name) \
 	{	.name = sensor_name,\
@@ -159,7 +158,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ACCELEROMETER,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -176,7 +175,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_MAGNETIC_FIELD,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -193,7 +192,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ORIENTATION,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -210,11 +209,11 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GYROSCOPE,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
-	{	.name = "BOSCH Light Sensor",
+	{	.name = "BOSCH light",
 		.vendor = "Bosch",
 		.version = 1,
 		.handle = BSX_SENSOR_ID_LIGHT,
@@ -282,7 +281,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GRAVITY,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -299,7 +298,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_LINEAR_ACCELERATION,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -316,7 +315,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -367,7 +366,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -384,7 +383,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GAME_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -401,7 +400,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GYROSCOPE_UNCALIBRATED,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
@@ -456,11 +455,11 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE,
 		.reserved = { }
 	},
-	{	.name = "BOSCH Heart Rate Sensor",
+	{	.name = "BOSCH heart rate",
 		.vendor = "Bosch",
 		.version = 1,
 		.handle = BSX_SENSOR_ID_HEART_RATE,
@@ -557,7 +556,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ACCELEROMETER,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -574,7 +573,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_MAGNETIC_FIELD,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -591,7 +590,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ORIENTATION,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -608,11 +607,11 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GYROSCOPE,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
-	{	.name = "BOSCH Light (Wakeup) Sensor",
+	{	.name = "BOSCH light wakeup",
 		.vendor = "Bosch",
 		.version = 1,
 		.handle = BSX_SENSOR_ID_LIGHT_WAKEUP,
@@ -663,7 +662,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.flags = SENSOR_FLAG_ON_CHANGE_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
-	{	.name = "BOSCH Proximity (Wakeup) Sensor",
+	{	.name = "BOSCH proximity wakeup",
 		.vendor = "Bosch",
 		.version = 1,
 		.handle = BSX_SENSOR_ID_PROXIMITY_WAKEUP,
@@ -693,7 +692,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GRAVITY,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -710,7 +709,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_LINEAR_ACCELERATION,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -727,7 +726,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -778,7 +777,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -795,7 +794,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GAME_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -812,7 +811,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GYROSCOPE_UNCALIBRATED,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
@@ -880,11 +879,11 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.fifoMaxEventCount = BATCH_MAX_FRAME_COUNT,
 		.stringType = SENSOR_STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR,
 		.requiredPermission = NULL,
-		.maxDelay = BSX_SENSOR_MAXDELAY_uS,
+		.maxDelay = 200000,
 		.flags = SENSOR_FLAG_CONTINUOUS_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
-	{	.name = "BOSCH Heart Rate (Wakeup) Sensor",
+	{	.name = "BOSCH heart rate wakeup",
 		.vendor = "Bosch",
 		.version = 1,
 		.handle = BSX_SENSOR_ID_HEART_RATE_WAKEUP,
@@ -969,25 +968,10 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 		.flags = SENSOR_FLAG_ONE_SHOT_MODE | SENSOR_FLAG_WAKE_UP,
 		.reserved = { }
 	},
-    {   .name = "BOSCH Wrist Tilt Gesture Sensor",
-        .vendor = "Bosch",
-        .version = 1,
-        .handle = BSX_SENSOR_ID_WRIST_TILT_DETECTOR_WAKEUP,
-        .type = SENSOR_TYPE_WRIST_TILT_GESTURE,
-        .maxRange = 1.0f,
-        .resolution = 1.0f,
-        .power = 0.0f,
-        .minDelay = SENSOR_MINDELAY_SPECIAL,
-        .fifoReservedEventCount = 0,
-        .fifoMaxEventCount = 0,
-        .stringType = SENSOR_STRING_TYPE_WRIST_TILT_GESTURE,
-        .requiredPermission = NULL,
-        .maxDelay = SENSOR_MAXDELAY_SPECIAL,
-        .flags = SENSOR_FLAG_SPECIAL_REPORTING_MODE | SENSOR_FLAG_WAKE_UP,
-        .reserved = { }
-    },
 
-    UNUSED_SENSOR_T("BOSCH gyroscope uncal offset wakeup")
+	UNUSED_SENSOR_T("BOSCH magnetic uncal offset wakeup")
+, //magnetic field uncalibrated offset wakeup
+	UNUSED_SENSOR_T("BOSCH gyroscope uncal offset wakeup")
 , //gyroscope uncalibrated offset wakeup
 	UNUSED_SENSOR_T("BOSCH power consumption wakeup")
 , //Power Consumption Wakeup, not used
@@ -1056,12 +1040,13 @@ void get_sensor_t(int32_t sensor_id, struct sensor_t **pp_sensor_t, int32_t *p_l
     return;
 }
 
-#define DEFAULT_SENSOR_CONFIG(code, unit, latency, len, hz) \
-	{	.rate_code = code,\
+/*default: disabled, data rate = 1Hz, unit = second, max dalay = 10s*/
+#define DEFAULT_SENSOR_CONFIG(odr, unit, latency, len, delay) \
+	{	.data_rate = odr,\
 		.latency_unit = unit,\
 		.max_latency = latency,\
 		.fifo_data_len = len,\
-		.rate_Hz = hz,\
+		.delay_onchange_Hz = delay,\
 	}
 
 //map with enum BSX4_SENSORLIST_INX
@@ -1069,37 +1054,37 @@ BSX_SENSOR_CONFIG BSX_sensor_config_nonwk[SENSORLIST_INX_AMBIENT_IAQ+1] = {
 
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 4, 0)
 ,    //SENSORLIST_INX_GAS_RESIST
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_ACCELEROMETER
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_MAGNETIC_FIELD
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_ORIENTATION,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_GYROSCOPE,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_LIGHT,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_6_25Hz, BSX_CONFSTR_UNITms, 200, 3, 0)
 ,    //SENSORLIST_INX_PRESSURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_TEMPERATURE,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
 ,    //SENSORLIST_INX_PROXIMITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_GRAVITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_LINEAR_ACCELERATION,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 0)
 ,    //SENSORLIST_INX_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_RELATIVE_HUMIDITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_AMBIENT_TEMPERATURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 0)
 ,    //SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 8, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 8, 0)
 ,    //SENSORLIST_INX_GAME_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 0)
 ,    //SENSORLIST_INX_GYROSCOPE_UNCALIBRATED,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_SIGNIFICANT_MOTION,
@@ -1107,9 +1092,9 @@ BSX_SENSOR_CONFIG BSX_sensor_config_nonwk[SENSORLIST_INX_AMBIENT_IAQ+1] = {
 ,    //SENSORLIST_INX_STEP_DETECTOR,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 4, 5)
 ,    //SENSORLIST_INX_STEP_COUNTER,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 0)
 ,    //SENSORLIST_INX_MAGNETIC_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 1, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 1, 5)
 ,    //SENSORLIST_INX_HEART_RATE,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_TILT_DETECTOR,
@@ -1125,11 +1110,11 @@ BSX_SENSOR_CONFIG BSX_sensor_config_nonwk[SENSORLIST_INX_AMBIENT_IAQ+1] = {
 ,    //SENSORLIST_INX_GYROSCOPE_UNCALIBRATED_OFFSET,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 3, 0)
 ,    //SENSORLIST_INX_POWER_CONSUMPTION,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 5)
 ,    //SENSORLIST_INX_AMBIENT_ALCOHOL,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 5)
 ,    //SENSORLIST_INX_AMBIENT_CO2,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 0, 2, 5)
 , //SENSORLIST_INX_AMBIENT_IAQ,
 };
 
@@ -1142,37 +1127,37 @@ BSX_SENSOR_CONFIG BSX_sensor_config_wk[SENSORLIST_INX_END-SENSORLIST_INX_WAKEUP_
 
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_WAKEUP_SIGNI_PRESSURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_ACCELEROMETER,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_ORIENTATION,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_GYROSCOPE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_LIGHT,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 3, 0)
 ,    //SENSORLIST_INX_WAKEUP_PRESSURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_TEMPERATURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_PROXIMITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_GRAVITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 7, 0)
 ,    //SENSORLIST_INX_WAKEUP_LINEAR_ACCELERATION,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 0)
 ,    //SENSORLIST_INX_WAKEUP_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_RELATIVE_HUMIDITY,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_1Hz, BSX_CONFSTR_UNITms, 200, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_AMBIENT_TEMPERATURE,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 0)
 ,    //SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 8, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 8, 0)
 ,    //SENSORLIST_INX_WAKEUP_GAME_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 6, 0)
 ,    //SENSORLIST_INX_WAKEUP_GYROSCOPE_UNCALIBRATED,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_WAKEUP_SIGNIFICANT_MOTION,
@@ -1180,9 +1165,9 @@ BSX_SENSOR_CONFIG BSX_sensor_config_wk[SENSORLIST_INX_END-SENSORLIST_INX_WAKEUP_
 ,    //SENSORLIST_INX_WAKEUP_STEP_DETECTOR,
 	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 4, 5)
 ,    //SENSORLIST_INX_WAKEUP_STEP_COUNTER,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 5)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 9, 0)
 ,    //SENSORLIST_INX_WAKEUP_MAGNETIC_ROTATION_VECTOR,
-	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 1, 0)
+	DEFAULT_SENSOR_CONFIG( BSX_CONFSTR_50Hz, BSX_CONFSTR_UNITms, 200, 1, 5)
 ,    //SENSORLIST_INX_WAKEUP_HEART_RATE,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_WAKEUP_TILT_DETECTOR,
@@ -1192,13 +1177,13 @@ BSX_SENSOR_CONFIG BSX_sensor_config_wk[SENSORLIST_INX_END-SENSORLIST_INX_WAKEUP_
 ,    //SENSORLIST_INX_WAKEUP_GLANCE_GESTURE,
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_WAKEUP_PICK_UP_GESTURE,
-	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
-,    //SENSORLIST_INX_WAKEUP_WRIST_TILT_GESTURE
+	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 6, 0)
+,    //SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED_OFFSET
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 6, 0)
 ,    //SENSORLIST_INX_WAKEUP_GYROSCOPE_UNCALIBRATED_OFFSET
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 0, 0)
 ,    //SENSORLIST_INX_WAKEUP_POWER_CONSUMPTION,
-	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 2, 0)
+	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 2, 5)
 ,    //SENSORLIST_INX_WAKEUP_ACTIVITY
 	DEFAULT_SENSOR_CONFIG( 0, 0, 0, 2, 0)
 ,    //SENSORLIST_INX_WAKEUP_AMBIENT_CO2,
@@ -1238,21 +1223,17 @@ static uint8_t encode_datarate(int64_t sampling_period_ns)
     {
         return BSX_CONFSTR_50Hz;
     }
-    if (Hz > 12.5 && Hz <= 25)
+    if (Hz > 12 && Hz <= 25)
     {
         return BSX_CONFSTR_25Hz;
     }
-    if (Hz > 6.25 && Hz <= 12.5)
+    if (Hz > 6 && Hz <= 12)
     {
         return BSX_CONFSTR_12_5Hz;
     }
-    if (Hz > 3.125 && Hz <= 6.25)
+    if (Hz > 1 && Hz <= 6)
     {
         return BSX_CONFSTR_6_25Hz;
-    }
-    if (Hz > 1 && Hz <= 3.125)
-    {
-        return BSX_CONFSTR_3_125Hz;
     }
     if (Hz > 0.5 && Hz <= 1)
     {
@@ -1319,23 +1300,6 @@ static void encode_max_latency(int64_t max_report_latency_ns, uint16_t *value, u
         }
 
     return;
-}
-
-/*BSX4 fusion algorithm supports several specified rates*/
-static float regulate_datarate(int64_t sampling_period_ns)
-{
-    float Hz;
-
-    if (0 == sampling_period_ns)
-    {
-        // handle on change/on shot/special type sensors
-        // and should avoid divide 0 exception
-        return 0;
-    }
-
-    Hz = 1000000000.0f / (float)sampling_period_ns;
-
-    return Hz;
 }
 
 /**
@@ -1436,7 +1400,7 @@ int activate_configref_resort(int32_t bsx_list_index, int32_t is_enable)
  *
  * @return: indicate if config string need to send
  */
-int batch_configref_resort(int32_t bsx_list_index, int64_t sampling_period_ns, int64_t max_report_latency_ns)
+int batch_configref_resort(int32_t bsx_list_index, int64_t sampling_period_ns, int64_t max_report_latency_ns, float delay_Hz)
 {
     uint32_t i;
     int32_t bsx_listinx_base;
@@ -1466,20 +1430,20 @@ int batch_configref_resort(int32_t bsx_list_index, int64_t sampling_period_ns, i
 
         if (bsx_list_index == current_bsxindex)
         {
-            p_config_refers[i]->rate_code = encode_datarate(sampling_period_ns);
+            p_config_refers[i]->data_rate = encode_datarate(sampling_period_ns);
             encode_max_latency(max_report_latency_ns,
                     &(p_config_refers[i]->max_latency),
                     &(p_config_refers[i]->latency_unit));
-            p_config_refers[i]->rate_Hz = regulate_datarate(sampling_period_ns);
+            p_config_refers[i]->delay_onchange_Hz = delay_Hz;
             return 1;
         }
     }
 
-    p_config[bsx_list_index - bsx_listinx_base].rate_code = encode_datarate(sampling_period_ns);
+    p_config[bsx_list_index - bsx_listinx_base].data_rate = encode_datarate(sampling_period_ns);
     encode_max_latency(max_report_latency_ns,
             &(p_config[bsx_list_index - bsx_listinx_base].max_latency),
             &(p_config[bsx_list_index - bsx_listinx_base].latency_unit));
-    p_config[bsx_list_index - bsx_listinx_base].rate_Hz = regulate_datarate(sampling_period_ns);
+    p_config[bsx_list_index - bsx_listinx_base].delay_onchange_Hz = delay_Hz;
 
     return 0;
 
@@ -1524,7 +1488,6 @@ static const BSX_INX_SPLID_MAPTBL bsx_inx_splid_maptbl[] = {
         { SENSORLIST_INX_WAKEUP_WAKE_GESTURE, BSX_OUTPUT_ID_WAKE_STATUS },
         { SENSORLIST_INX_WAKEUP_GLANCE_GESTURE, BSX_OUTPUT_ID_GLANCE_STATUS },
         { SENSORLIST_INX_WAKEUP_PICK_UP_GESTURE, BSX_OUTPUT_ID_PICKUP_STATUS },
-        { SENSORLIST_INX_WAKEUP_WRIST_TILT_GESTURE, BSX_OUTPUT_ID_WRIST_TILT_STATUS },
         { SENSORLIST_INX_WAKEUP_ACTIVITY, BSX_OUTPUT_ID_ACTIVITY },
 };
 

@@ -75,8 +75,8 @@
  * parties which may result from its use.
  *
  * @file         sensord_pltf.h
- * @date         "Mon Mar 21 11:35:09 2016 +0800"
- * @commit       "f3c5406"
+ * @date         "Wed Dec 23 14:29:46 2015 +0800"
+ * @commit       "bbf5b88"
  *
  * @brief
  *
