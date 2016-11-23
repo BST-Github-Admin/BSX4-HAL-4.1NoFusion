@@ -175,81 +175,23 @@ void trace_log(uint32_t level, const char *fmt, ...)
 {
     int ret = 0;
     va_list ap;
-#if !defined(UNIT_TEST_ACTIVE)
-    char buffer[256] = { 0 };
-#endif
 
-    if (0 == trace_to_logcat)
+    if (0 == (trace_level & level))
     {
-        if (0 == (trace_level & level))
-        {
-            return;
-        }
-
-        va_start(ap, fmt);
-        ret = vfprintf(g_fp_trace, fmt, ap);
-        va_end(ap);
-
-        // otherwise, data is buffered rather than be wrote to file
-        // therefore when stopped by signal, NO data left in file!
-        fflush(g_fp_trace);
-
-        if (ret < 0)
-        {
-            printf("trace_log: fprintf(g_fp_trace, fmt, ap)  fail!!\n");
-        }
+        return;
     }
-    else
+
+    va_start(ap, fmt);
+    ret = vfprintf(g_fp_trace, fmt, ap);
+    va_end(ap);
+
+    // otherwise, data is buffered rather than be wrote to file
+    // therefore when stopped by signal, NO data left in file!
+    fflush(g_fp_trace);
+
+    if (ret < 0)
     {
-
-#if !defined(UNIT_TEST_ACTIVE)
-        /**
-         * here use android api
-         * Let it use Android trace level.
-         */
-#include<android/log.h>
-#define BST_LOG_TAG    "sensord"
-
-        va_start(ap, fmt);
-        vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
-        va_end(ap);
-
-        switch (level)
-        {
-            case LOG_LEVEL_N:
-                __android_log_print(ANDROID_LOG_FATAL, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_E:
-                __android_log_print(ANDROID_LOG_ERROR, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_W:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_I:
-                __android_log_print(ANDROID_LOG_INFO, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_D:
-                __android_log_print(ANDROID_LOG_DEBUG, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_LADON:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
-                break;
-            default:
-                break;
-        }
-
-#else
-
-        if(0 == (trace_level & level))
-        {
-            return;
-        }
-
-        va_start(ap, fmt);
-        vprintf(fmt, ap);
-        va_end(ap);
-
-#endif
+        printf("trace_log: fprintf(g_fp_trace, fmt, ap)  fail!!\n");
     }
 
     return;

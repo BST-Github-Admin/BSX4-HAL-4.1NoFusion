@@ -101,7 +101,6 @@ extern int amsh_calibration;
 extern int data_log;
 extern int bsx_datalog;
 extern int trace_level;
-extern int trace_to_logcat;
 extern long long unsigned int sensors_mask;
 
 #define SOLUTION_MDOF       0

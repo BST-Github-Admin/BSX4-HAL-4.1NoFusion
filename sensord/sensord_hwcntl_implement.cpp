@@ -97,13 +97,6 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#if !defined(UNIT_TEST_ACTIVE)
-#include<android/log.h>
-/*Android utils headers*/
-#include <utils/SystemClock.h>
-#include <utils/Timers.h>
-#endif
-
 #include "BstSensor.h"
 
 #include "axis_remap.h"
@@ -239,7 +232,6 @@ EV_FF_STATUS        0x17 EV_MAX            0x1f EV_CNT            (EV_MAX+1)
 #define AKM09911_COMPVAL_TO_uT (0.6) //AKM09911 output is in unit of 0.6uT
 #define YAS5xx_COMPVAL_TO_uT (0.001) //YAS5xx output is in unit of 0.001uT
 
-#if !defined(UNIT_TEST_ACTIVE)
 static char iio_dev0_dir_name[128] = { 0 };
 
 /**
@@ -248,11 +240,9 @@ static char iio_dev0_dir_name[128] = { 0 };
  */
 
 static uint32_t hwdata_unit_toread = 10;
-#endif
 static uint32_t default_watermark = 10;
 
 
-#if !defined(UNIT_TEST_ACTIVE)
 static int32_t accl_scan_size, gyro_scan_size, magn_scan_size;
 static int32_t accl_iio_fd = -1;
 static int32_t gyro_iio_fd = -1;
@@ -271,7 +261,6 @@ static char gyr_input_dir_name[128] = {0};
 static float BMI160_acc_resl = 0.061; //16bit ADC, default range +-2000 mg. algorithm input requires "mg"
 static float BMA255_acc_resl = 0.97656; //12bit ADC, default range +-2000 mg. algorithm input requires "mg"
 
-#endif
 /**
  *
  * @param p_sSensorList
@@ -693,7 +682,6 @@ static inline int32_t ap_convert_latency(
 }
 
 
-#if !defined(UNIT_TEST_ACTIVE)
 static int32_t is_acc_open = 0;
 static int32_t is_gyr_open = 0;
 static int32_t is_mag_open = 0;
@@ -803,7 +791,6 @@ static void ap_config_phyACC(bsx_f32_t sample_rate)
     int32_t fifo_data_sel_regval;
     float physical_Hz = 0;
     uint32_t period_ms = 0;
-    struct itimerspec timerspec;
     static float pre_poll_rate = 0;
 
     PINFO("set physical ACC rate %f", sample_rate);
@@ -903,7 +890,6 @@ static void ap_config_phyGYR(bsx_f32_t sample_rate)
     int32_t fifo_data_sel_regval;
     float physical_Hz = 0;
     uint32_t period_ms = 0;
-    struct itimerspec timerspec;
     static float pre_poll_rate = 0;
 
     PINFO("set physical GYRO rate %f", sample_rate);
@@ -1113,11 +1099,9 @@ static void ap_config_phyMAG(bsx_f32_t sample_rate)
     return;
 }
 
-#endif
 
 static void ap_config_physensor(bsx_u32_t input_id, bsx_f32_t sample_rate)
 {
-#if !defined(UNIT_TEST_ACTIVE)
     int32_t ret = 0;
 
     if (BSX_PHYSICAL_SENSOR_ID_INVALID == input_id)
@@ -1146,7 +1130,6 @@ static void ap_config_physensor(bsx_u32_t input_id, bsx_f32_t sample_rate)
     {
         PERR("write_sysfs() fail");
     }
-#endif
 
     return;
 }
@@ -1206,11 +1189,9 @@ static void ap_send_config(int32_t bsx_list_inx)
         }
     }
 
-#if !defined(UNIT_TEST_ACTIVE)
     if(0 == active_nonwksensor_cnt + active_wksensor_cnt){
         BMI055_tm_alignbuf_clean();
     }
-#endif
 
     {
         switch (bsx_list_inx) {
@@ -1413,12 +1394,6 @@ int32_t ap_flush(BstSensor *bstsensor, int32_t handle)
         return -EINVAL;
     }
 
-    /*call driver interface, flush event is sent by driver when complete flushing.
-     The flush happens asynchronously (i.e.: this function must return immediately)
-     */
-#if !defined(UNIT_TEST_ACTIVE)
-    // TODO:
-#endif
 
     //Now the driver can not support this specification, so has to work around
     (void) bstsensor->send_flush_event(handle);
@@ -1434,237 +1409,6 @@ int32_t ap_flush(BstSensor *bstsensor, int32_t handle)
 }
 
 
-uint32_t UNITTEST_hw_deliver_sensordata(BstSensor *bstsensor)
-{
-    static int64_t cur_time = 0x100;
-    static int32_t stub_index = 0;
-    int32_t sim_interval_ns = 5000000;
-    HW_DATA_UNION *p_hwdata;
-    int32_t ret;
-    static int32_t if_end_deliver = 0;
-
-    float acc_stub[] = {
-            52, -41, 927,
-            28, 658, 616,
-            25, 666, 622,
-            49, -39, 927,
-            52, -41, 927,
-            28, 658, 616,
-            25, 666, 622,
-            49, -39, 927,
-    };
-    float gyro_stub[] = {
-            0, 9, 0,
-            2, 8, -1,
-            1, 9, 1,
-            1, 8, 1,
-            0, 9, 0,
-            2, 8, -1,
-            1, 9, 1,
-            1, 8, 1,
-    };
-    float mag_stub[] = {
-            257, 6825, 6380,
-            536, -424, 9504,
-            257, 6825, 6380,
-            536, -424, 9504,
-            257, 6825, 6380,
-            536, -424, 9504,
-            257, 6825, 6380,
-            536, -424, 9504,
-    };
-
-    usleep(100000); //delay the display speed
-
-    if(if_end_deliver){
-        return 0;
-    }
-
-
-    cur_time += sim_interval_ns;//forged timestamp
-
-    switch (stub_index) {
-        case 0:
-        case 1:
-        case 2:
-        case 4:
-        case 5:
-        case 6:
-            p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
-            if (NULL == p_hwdata)
-            {
-                PERR("malloc fail");
-                return 0;
-            }
-
-            p_hwdata->id = SENSOR_TYPE_ACCELEROMETER;
-            p_hwdata->x = acc_stub[stub_index*3];
-            p_hwdata->y = acc_stub[stub_index*3 + 1];
-            p_hwdata->z = acc_stub[stub_index*3 + 2];
-            p_hwdata->timestamp = cur_time;
-
-            hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_a);
-
-            ret = bstsensor->tmplist_hwcntl_acclraw->list_add_rear((void *) p_hwdata);
-            if (ret)
-            {
-                PERR("list_add_rear() fail, ret = %d", ret);
-                if(-1 == ret){
-                    free(p_hwdata);
-                }
-            }
-
-            p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
-            if (NULL == p_hwdata)
-            {
-                PERR("malloc fail");
-                return 0;
-            }
-
-            p_hwdata->id = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
-            p_hwdata->x = gyro_stub[stub_index*3];
-            p_hwdata->y = gyro_stub[stub_index*3 + 1];
-            p_hwdata->z = gyro_stub[stub_index*3 + 2];
-            p_hwdata->timestamp = cur_time;
-
-            hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_g);
-
-            ret = bstsensor->tmplist_hwcntl_gyroraw->list_add_rear((void *) p_hwdata);
-            if (ret)
-            {
-                PERR("list_add_rear() fail, ret = %d", ret);
-                if(-1 == ret){
-                    free(p_hwdata);
-                }
-            }
-
-            break;
-
-        case 3:
-        case 7:
-            p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
-            if (NULL == p_hwdata)
-            {
-                PERR("malloc fail");
-                return 0;
-            }
-
-            p_hwdata->id = SENSOR_TYPE_ACCELEROMETER;
-            p_hwdata->x = acc_stub[stub_index*3];
-            p_hwdata->y = acc_stub[stub_index*3 + 1];
-            p_hwdata->z = acc_stub[stub_index*3 + 2];
-            p_hwdata->timestamp = cur_time;
-
-            hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_a);
-
-            ret = bstsensor->tmplist_hwcntl_acclraw->list_add_rear((void *) p_hwdata);
-            if (ret)
-            {
-                PERR("list_add_rear() fail, ret = %d", ret);
-                if(-1 == ret){
-                    free(p_hwdata);
-                }
-            }
-
-            p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
-            if (NULL == p_hwdata)
-            {
-                PERR("malloc fail");
-                return 0;
-            }
-
-            p_hwdata->id = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
-            p_hwdata->x = gyro_stub[stub_index*3];
-            p_hwdata->y = gyro_stub[stub_index*3 + 1];
-            p_hwdata->z = gyro_stub[stub_index*3 + 2];
-            p_hwdata->timestamp = cur_time;
-
-            hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_g);
-
-            ret = bstsensor->tmplist_hwcntl_gyroraw->list_add_rear((void *) p_hwdata);
-            if (ret)
-            {
-                PERR("list_add_rear() fail, ret = %d", ret);
-                if(-1 == ret){
-                    free(p_hwdata);
-                }
-            }
-
-            p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
-            if (NULL == p_hwdata)
-            {
-                PERR("malloc fail");
-                return 0;
-            }
-
-            p_hwdata->id = SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED;
-            p_hwdata->x = mag_stub[stub_index*3];
-            p_hwdata->y = mag_stub[stub_index*3 + 1];
-            p_hwdata->z = mag_stub[stub_index*3 + 2];
-            p_hwdata->timestamp = cur_time;
-
-            hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_m);
-
-            ret = bstsensor->tmplist_hwcntl_magnraw->list_add_rear((void *) p_hwdata);
-            if (ret)
-            {
-                PERR("list_add_rear() fail, ret = %d", ret);
-                if(-1 == ret){
-                    free(p_hwdata);
-                }
-            }
-
-            break;
-        default:
-            break;
-    }
-
-    stub_index++;
-
-#if 1
-    if (bstsensor->tmplist_hwcntl_acclraw->list_len
-            + bstsensor->tmplist_hwcntl_gyroraw->list_len
-            + bstsensor->tmplist_hwcntl_magnraw->list_len)
-    {
-        pthread_mutex_lock(&(bstsensor->shmem_hwcntl.mutex));
-
-        ret = bstsensor->shmem_hwcntl.p_list->list_mount_rear(bstsensor->tmplist_hwcntl_acclraw);
-        if(ret)
-        {
-            PWARN("list mount fail, ret = %d", ret);
-        }
-        ret = bstsensor->shmem_hwcntl.p_list->list_mount_rear(bstsensor->tmplist_hwcntl_gyroraw);
-        if(ret)
-        {
-            PWARN("list mount fail, ret = %d", ret);
-        }
-        ret = bstsensor->shmem_hwcntl.p_list->list_mount_rear(bstsensor->tmplist_hwcntl_magnraw);
-        if(ret)
-        {
-            PWARN("list mount fail, ret = %d", ret);
-        }
-
-        pthread_cond_signal(&(bstsensor->shmem_hwcntl.cond));
-        pthread_mutex_unlock(&(bstsensor->shmem_hwcntl.mutex));
-    }
-#endif
-
-	if(8 == stub_index)
-	{
-	    /**Stop delivering stub raw data, send a special flush event to notify main thread to end
-	     * but before that wait a moment to let main thread can handle all events*/
-	    usleep(500000);
-	    (void) bstsensor->send_flush_event(0xFFFFFFFF);
-	    if_end_deliver = 1;
-	}
-
-    return 0;
-}
-
-
-
-
-#if !defined(UNIT_TEST_ACTIVE)
 static void ap_hw_process_IIO_frame(int32_t header, char *data, BstSimpleList *dest_list)
 {
 
@@ -1790,6 +1534,7 @@ static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
     int16_t X_tmp = 0;
     int16_t Y_tmp = 0;
     int16_t Z_tmp = 0;
+    struct timespec tmspec;
     int64_t sys_tm = 0;
     int32_t frames = 0;
     int32_t i;
@@ -1799,7 +1544,8 @@ static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
     int64_t to_resample_tm = 0;
 
 
-    sys_tm = android::elapsedRealtimeNano();
+    clock_gettime(CLOCK_MONOTONIC, &tmspec);
+    sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
 
     if(0 == fname_buf[0]){
         snprintf(fname_buf, MAX_FILENAME_LEN, "%s/%s", acc_input_dir_name, "fifo_data_frame");
@@ -1970,12 +1716,14 @@ static void ap_hw_poll_bmg160(BstSimpleList *dest_list)
     int16_t X_tmp = 0;
     int16_t Y_tmp = 0;
     int16_t Z_tmp = 0;
+    struct timespec tmspec;
     int64_t sys_tm = 0;
     int32_t frames = 0;
     int32_t i;
     int64_t average_interval;
 
-    sys_tm = android::elapsedRealtimeNano();
+    clock_gettime(CLOCK_MONOTONIC, &tmspec);
+    sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
 
     if(0 == fname_buf[0]){
         snprintf(fname_buf, MAX_FILENAME_LEN, "%s/%s", gyr_input_dir_name, "fifo_data_frame");
@@ -2143,8 +1891,10 @@ static void ap_hw_poll_bmm150(BstSimpleList *dest_list)
     int32_t Y_tmp = 0;
     int32_t Z_tmp = 0;
     int64_t sys_tm = 0;
+    struct timespec tmspec;
 
-    sys_tm = android::elapsedRealtimeNano();
+    clock_gettime(CLOCK_MONOTONIC, &tmspec);
+    sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
 
     //force update mag sample, otherwise it update only in 10Hz
     ret = wr_sysfs_oneint("op_mode", mag_input_dir_name, SENSOR_PM_LP1);
@@ -2204,6 +1954,7 @@ static void ap_hw_poll_akm099xx(BstSimpleList *dest_list)
     int32_t Y_tmp = 0;
     int32_t Z_tmp = 0;
     int64_t sys_tm = 0;
+    struct timespec tmspec;
 
     if(0 == fname_buf[0]){
         snprintf(fname_buf, MAX_FILENAME_LEN, "%s/%s", mag_input_dir_name, "value");
@@ -2216,7 +1967,8 @@ static void ap_hw_poll_akm099xx(BstSimpleList *dest_list)
         return;
     }
 
-    sys_tm = android::elapsedRealtimeNano();
+    clock_gettime(CLOCK_MONOTONIC, &tmspec);
+    sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
 
     /*AKM need reset power mode to let it update data register*/
     ret = wr_sysfs_oneint("op_mode", mag_input_dir_name, SENSOR_PM_NORMAL);
@@ -2271,6 +2023,7 @@ static void ap_hw_poll_yas5xx(BstSimpleList *dest_list)
     int32_t Y_tmp = 0;
     int32_t Z_tmp = 0;
     int64_t sys_tm = 0;
+    struct timespec tmspec;
 
     if(0 == fname_buf[0]){
         snprintf(fname_buf, MAX_FILENAME_LEN, "%s/%s", mag_input_dir_name, "value");
@@ -2283,7 +2036,8 @@ static void ap_hw_poll_yas5xx(BstSimpleList *dest_list)
         return;
     }
 
-    sys_tm = android::elapsedRealtimeNano();
+    clock_gettime(CLOCK_MONOTONIC, &tmspec);
+    sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
 
     /*YAS need reset power mode to let it update data register*/
     ret = wr_sysfs_oneint("op_mode", mag_input_dir_name, SENSOR_PM_NORMAL);
@@ -3356,7 +3110,6 @@ static uint32_t COMPASS_M4G_hw_deliver_sensordata(BstSensor *bstsensor)
 
 }
 
-#endif
 
 
 static void ap_show_ver()
@@ -3482,7 +3235,6 @@ static void ap_show_ver()
     return;
 }
 
-#if !defined(UNIT_TEST_ACTIVE)
 static void driver_show_ver(const char* base_path)
 {
     char path[64] = {0};
@@ -3806,15 +3558,12 @@ static int32_t ap_hwcntl_init_MAGN()
     return 0;
 
 }
-#endif
 
 
 int32_t hwcntl_init(BstSensor *bstsensor)
 {
     int32_t ret = 0;
-#if !defined(UNIT_TEST_ACTIVE)
     struct itimerspec timerspec;
-#endif
 
     ap_show_ver();
 
@@ -3822,7 +3571,6 @@ int32_t hwcntl_init(BstSensor *bstsensor)
     bstsensor->pfun_activate = ap_activate;
     bstsensor->pfun_batch = ap_batch;
     bstsensor->pfun_flush = ap_flush;
-#if !defined(UNIT_TEST_ACTIVE)
     if(SOLUTION_MDOF == solution_type)
     {
         bstsensor->pfun_hw_deliver_sensordata = MDOF_hw_deliver_sensordata;
@@ -3868,10 +3616,6 @@ int32_t hwcntl_init(BstSensor *bstsensor)
         timerspec.it_interval.tv_nsec = timerspec.it_value.tv_nsec;
         ret = timerfd_settime(poll_timer_fd, 0, &timerspec, NULL);
     }
-
-#else
-    bstsensor->pfun_hw_deliver_sensordata = UNITTEST_hw_deliver_sensordata;
-#endif
 
 
     return ret;

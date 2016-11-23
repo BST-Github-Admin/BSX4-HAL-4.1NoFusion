@@ -177,14 +177,10 @@ typedef struct
 } HW_DATA_UNION;
 
 /* this path must exist and user <system> must have permission to write to it */
-#if !defined(UNIT_TEST_ACTIVE)
-#define PATH_DIR_SENSOR_STORAGE "/data/misc/sensord_stor"
-#else
 #if defined(SENSORD_STOR)
 #define PATH_DIR_SENSOR_STORAGE SENSORD_STOR"/sensord_stor"
 #else
 #define PATH_DIR_SENSOR_STORAGE "/root/My_C/sensord_stor"
-#endif
 #endif
 
 
