@@ -5,15 +5,15 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../hal/BstSensor.cpp \
-../hal/sensors.cpp 
+../hal/main.cpp 
 
 OBJS += \
 ./hal/BstSensor.o \
-./hal/sensors.o 
+./hal/main.o 
 
 CPP_DEPS += \
 ./hal/BstSensor.d \
-./hal/sensors.d 
+./hal/main.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
