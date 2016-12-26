@@ -1510,7 +1510,6 @@ int32_t convert_BSX_ListInx(int32_t bsx_list_inx)
 }
 
 
-#if !defined(UNIT_TEST_ACTIVE)
 /**
  *
  * @param event_name: target event's name
@@ -1588,8 +1587,6 @@ void open_input_by_name(const char *event_name, int *p_fd, int *p_num)
 
     return;
 }
-#endif
-
 
 
 

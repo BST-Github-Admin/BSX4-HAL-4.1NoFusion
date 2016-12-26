@@ -92,7 +92,7 @@
 #include <sys/cdefs.h>
 #include <signal.h>
 #include <pthread.h>
-#if !defined(UNIT_TEST_ACTIVE)
+#if !defined(PLTF_LINUX_ENABLED)
 #include <hardware/sensors.h>
 #else
 #include "sensors.h"

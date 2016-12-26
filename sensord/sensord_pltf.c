@@ -175,7 +175,7 @@ void trace_log(uint32_t level, const char *fmt, ...)
 {
     int ret = 0;
     va_list ap;
-#if !defined(UNIT_TEST_ACTIVE)
+#if !defined(PLTF_LINUX_ENABLED)
     char buffer[256] = { 0 };
 #endif
 
@@ -202,7 +202,7 @@ void trace_log(uint32_t level, const char *fmt, ...)
     else
     {
 
-#if !defined(UNIT_TEST_ACTIVE)
+#if !defined(PLTF_LINUX_ENABLED)
         /**
          * here use android api
          * Let it use Android trace level.

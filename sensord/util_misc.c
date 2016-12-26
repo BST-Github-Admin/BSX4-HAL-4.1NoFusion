@@ -187,32 +187,6 @@ void debug_mem(uint8_t *addr, uint32_t len)
     printf("\n+++++++++++++++++++++++++++++++++\n");
 }
 
-#if !defined(UNIT_TEST_ACTIVE)
-#include <android/log.h>
-void syslog_debug_mem(unsigned char *addr, uint32_t len)
-{
-    unsigned int i;
-    unsigned int BYTES_PER_LINE = 16;
-    char *buffer = NULL;
-
-    buffer = (char *) malloc(len * 3 + 1);
-    if (NULL == buffer)
-    {
-        __android_log_print(ANDROID_LOG_ERROR, "bst_hal", "syslog_debug_mem malloc fail!!!");
-        return;
-    }
-
-    for (i = 0; i < len; i++)
-    {
-        sprintf(buffer + (i * 3), "%02x%c", addr[i], ((i + 1) % BYTES_PER_LINE) ? ' ' : '\n');
-    }
-
-    __android_log_print(ANDROID_LOG_ERROR, "bst_hal", "%s", buffer);
-    __android_log_print(ANDROID_LOG_ERROR, "bst_hal", "\n+++++++++++++++++++++++++++++++++\n");
-
-    free(buffer);
-}
-#endif
 
 /*msecs is assumed to be in milliseconds */
 int bst_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t msecs)

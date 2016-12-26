@@ -146,9 +146,6 @@ extern "C"
     int get_num_set_bits_u32(uint32_t n);
 
     void debug_mem(unsigned char *addr, uint32_t len);
-#if !defined(UNIT_TEST_ACTIVE)
-    void syslog_debug_mem(unsigned char *addr, uint32_t len);
-#endif
     int bst_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t msecs);
     int bst_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, uint32_t usecs);
 //int bst_pthread_sigqueue(pthread_t thread, int sig, const union sigval value);

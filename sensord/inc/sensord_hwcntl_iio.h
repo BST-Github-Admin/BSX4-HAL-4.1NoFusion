@@ -93,7 +93,6 @@
  * @param iio_dir
  * @return
  */
-#if !defined(UNIT_TEST_ACTIVE)
 static inline int get_IIOnum_by_name(const char *name, const char *iio_dir)
 {
 #define IIO_NAME_MAXLEN 30
@@ -162,7 +161,6 @@ static inline int get_IIOnum_by_name(const char *name, const char *iio_dir)
     closedir(dp);
     return -ENODEV;
 }
-#endif
 
 #define MAX_FILENAME_LEN 256
 
@@ -187,7 +185,6 @@ static inline int wr_sysfs_twoint(const char *filename, char *basedir, int val1,
 
 static inline  int wr_sysfs_oneint(const char *filename, char *basedir, int val)
 {
-#if !defined(UNIT_TEST_ACTIVE)
     FILE *fp;
     char fname_buf[MAX_FILENAME_LEN+1];
 
@@ -203,16 +200,11 @@ static inline  int wr_sysfs_oneint(const char *filename, char *basedir, int val)
     fclose(fp);
 
     return 0;
-#else
-
-    return 0;
-#endif
 }
 
 
 static inline  int wr_sysfs_str(const char *filename, char *basedir, const char *str)
 {
-#if !defined(UNIT_TEST_ACTIVE)
     FILE *fp;
     char fname_buf[MAX_FILENAME_LEN+1];
 
@@ -228,16 +220,11 @@ static inline  int wr_sysfs_str(const char *filename, char *basedir, const char 
     fclose(fp);
 
     return 0;
-#else
-
-    return 0;
-#endif
 }
 
 
 static inline int rd_sysfs_oneint(const char *filename, char *basedir, int *pval)
 {
-#if !defined(UNIT_TEST_ACTIVE)
     FILE *fp;
     char fname_buf[MAX_FILENAME_LEN+1];
     int ret;
@@ -258,10 +245,6 @@ static inline int rd_sysfs_oneint(const char *filename, char *basedir, int *pval
     }
 
     return 0;
-#else
-
-    return 0;
-#endif
 }
 
 
