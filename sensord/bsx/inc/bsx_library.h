@@ -91,7 +91,7 @@ extern "C"
 {
 #endif
 
-/*! @brief Retrieve the current version of the library
+/*! @brief Retrieve the current version of BSX
  *
  * @param[in,out]      bsx_version_p       Pointer to structure containing the version information
  *
@@ -99,6 +99,17 @@ extern "C"
  *  @retval BSX_OK
  */
 bsx_return_t bsx_get_version(bsx_version_t * bsx_version_p);
+
+/*! @brief Retrieve the current version of BSX as string
+ *
+ * @param[in,out]   ident_p         Returns the version identification in the provided buffer
+ * @param[in,out]   n_ident_p       On input, size of the buffer; on output, actual used size of the buffer
+ *
+ * @return Zero when successful, otherwise an error code
+ *  @retval BSX_OK
+ *  @retval BSX_E_ABORT  The size of the buffer is too small.
+ */
+bsx_return_t bsx_get_version_string(bsx_instance_t * const bsx_p, bsx_u8_t *ident_p, bsx_u32_t *n_ident_p);
 
 /*! @brief Initialize the library
  *
@@ -113,7 +124,19 @@ bsx_return_t bsx_get_version(bsx_version_t * bsx_version_p);
  *
  * Further information is available in the integration guideline for \ref intguideInterfacesInit "initialization of BSX".
  */
-bsx_return_t bsx_init(bsx_instance_t * const bsx_p);
+bsx_return_t bsx_init(bsx_instance_t * bsx_p);
+
+/*! @brief Get the operation state of BSX
+ *
+ * @param[in]  bsx_p  Instance of BSX
+ *
+ * @return Current operation state
+ *  @retval 0   not yet initialized nor configured
+ *  @retval 1   initialized but not fully configured; operation state before any other operation than configuration is meaningful
+ *  @retval 2   all operations can be executed except processing of signals
+ *  @retval 4   all operations can be executed except update of configuration and state
+ */
+uint8_t bsx_get_operation_state(bsx_instance_t * const bsx_p);
 
 /*! @brief perform signal processing steps of the library for provided signal samples and, if desired, return results of the processing
  *
@@ -189,7 +212,7 @@ bsx_return_t bsx_get_output_signal(bsx_instance_t * const bsx_p, bsx_fifo_data_t
  * @param[in,out]   bsx_p                           Instance of the library
  * @param[in,out]   virtual_sensor_config_p         On calling the function: array of configurations for virtual sensors representing library outputs;
  *                                                  On function return: current configuration for requested outputs depending on library restrictions as well as other provided outputs
- * @param[in,out]   n_virtual_sensor_config_p       On calling the function: provided length of \p virtual_sensor_config_p;
+ * @param[in,out]   n_virtual_sensor_config_p       On calling the function: provided length of \p virtual_sensor_config_p; set to zero to retrieve the current physical input sensor configuration
  *                                                  On function return: number of modified values in \p virtual_sensor_config_p
  * @param[in,out]   physical_sensor_config_p        Array of settings for physical sensors providing the library inputs depending. Content is not
  *                                                  changed when \p n_physical_sensor_config_p is zero.
@@ -199,6 +222,7 @@ bsx_return_t bsx_get_output_signal(bsx_instance_t * const bsx_p, bsx_fifo_data_t
  * @return Zero when successful, positive value for information and warnings, otherwise a negative value as error code.
  *  @retval BSX_OK
  *  @retval BSX_I_SU_SUBSCRIBEDOUTPUTGATES
+ *  @retval BSX_I_SU_SUBSCRIBEDINPUTGATES
  *  @retval BSX_W_SU_NOOUTPUTGATE
  *  @retval BSX_W_SU_UNKNOWNOUTPUTGATE
  *  @retval BSX_E_SU_GATECOUNTEXCEEDSARRAY
@@ -209,15 +233,22 @@ bsx_return_t bsx_get_output_signal(bsx_instance_t * const bsx_p, bsx_fifo_data_t
  *  @retval BSX_E_INVALIDSTATE
  *  @retval BSX_E_FATAL
  *
- * @note Usage and evaluation of the sensor identifier is mandatory. The order of configuration settings for library inputs
+ * @note All parameters must always be valid pointers, however, the one of the values of the dimension variables \p n_virtual_sensor_config_p
+ *       or \p n_physical_sensor_config_p may be set to zero.
+ * @note Usage and evaluation of the sensor identifier is mandatory. The order of configuration settings for BSX inputs
  *       as well outputs, i.e. \p physical_sensor_config_p and \p virtual_sensor_config_p, is arbitrary, may and can be
  *       changed from function call to function call and depends on the library solution.
  * @note If \p n_physical_sensor_config_p is set to zero,
- *         - the current subscription to library outputs is returned within \p virtual_sensor_config_p
- *         - the maximum length of \p virtual_sensor_config_p provided by \p n_virtual_sensor_config_p must be at least the number of provided virtual sensors
+ *         - the current subscription to virtual sensor outputs is returned within \p virtual_sensor_config_p
+ *         - the maximum length of \p virtual_sensor_config_p provided by \p n_virtual_sensor_config_p must be at least the number of provided virtual output sensors
  *         - the subscription to library outputs is not changed regardless of the configuration written into \p virtual_sensor_config_p.
+ * @note If \p n_virtual_sensor_config_p is set to zero,
+ *         - the current subscription to library inputs is returned within \p physical_sensor_config_p
+ *         - the maximum length of \p physical_sensor_config_p provided by \p n_physical_sensor_config_p must be at least the number of possible physical input sensors
+ *         - the subscription to BSX outputs is not changed nor is the physical input sensor configuration altered.
  *
- * Further information and example sequences for updating the subscription are available in the integration guideline for \ref intguideInterfacesUpdatesubscription "the subscription update functionality".
+ * Further information and example sequences for updating the subscription are available in the integration guideline
+ * for \ref intguideInterfacesUpdatesubscription "the subscription update functionality".
  */
 bsx_return_t bsx_update_subscription(bsx_instance_t *const bsx_p,
                                      bsx_sensor_configuration_t *const virtual_sensor_config_p,

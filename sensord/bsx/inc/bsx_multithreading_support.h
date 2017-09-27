@@ -1,4 +1,4 @@
- /*
+/* 
  *
  * (C) Copyright 2011~2015 Bosch Sensortec GmbH All Rights Reserved
  *
@@ -74,40 +74,86 @@
  * parties which may result from its use.
  */
 
-/*!@addtogroup bsx_integrationsupport
+/*!
+ * @defgroup bsx_multithreading_support
+ * @brief
  * @{*/
 
-#ifndef __BSX_USER_DEF_H__
-#define __BSX_USER_DEF_H__
 
-/*!
- * @brief Contains the user specific definitions to be included with bsx_interface.h
+#ifndef BSX_MULTITHREADING_SUPPORT_H_
+#define BSX_MULTITHREADING_SUPPORT_H_
+
+
+/********************************************************/
+/* header includes */
+#include "bsx_datatypes.h"
+
+
+/********************************************************/
+/* function prototype declarations */
+
+
+/* forward definition of the documentation */
+/*! @def BSX_MT_TRIGGER_THREAD(x)
+ * @brief Place holder macro for a call-back function to push a frame to a thread message queue
  *
- * @note this shall typically be changeable and changed by a user, e.g. to include sensors.h from the Android headers
+ * @param[in] x Identifier of the thread
  */
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+/*! @def BSX_ENTER_CRITICAL_SECTION()
+ * @brief Place holder macro for call-back function to enter a critical code section
+ */
 
-//#include "sensors.h" // locate here e.g. sensors.h from Android
+/*! @def BSX_LEAVE_CRITICAL_SECTION()
+ * @brief Place holder macro for call-back function to leave a critical code section
+ */
 
-#ifndef BSX_TRACE_ENABLED
-#define BSX_TRACE_ENTRY(object, event, id)
+
+#ifdef ENABLE_MULTITHREADING_CALIBRATION
+
+// TODO remove this ugly definition for multi-threading emulation and use/implement the generic Ladon MT concept
+/*! @brief Maximum size of the buffer to store samples for emulation of queues */
+#define BSX_MULTITHREADING_BUFFER_MAX (100)
+/*! @brief Enter critical code section by disabling all interrupts
+ *
+ * Callback function to integrate BSX with an operating system to avoid race conditions when accessing
+ * common memory among threads, especially memory accesses from different threads.
+ */
+void bsx_enter_critical_section(void);
+
+/*! @brief Leave critical code section by re-enabling all previous interrupts
+ *
+ * Callback function to integrate BSX with an operating system to avoid race conditions when accessing
+ * common memory among threads, especially memory accesses from different threads.
+ */
+void bsx_leave_critical_section(void);
+
+/*! @brief Signals to the OS that a thread shall be executed
+ *
+ * Callback function to integrate with an operating system to signal that an extra thread needs to be run
+ *
+ * @param[in] x Identifier of the thread
+ */
+void bsx_mt_trigger_thread(uint8_t x);
+
+
+#define BSX_ENTER_CRITICAL_SECTION()    bsx_enter_critical_section()
+#define BSX_LEAVE_CRITICAL_SECTION()    bsx_leave_critical_section()
+
+#define BSX_MT_TRIGGER_THREAD(x)        bsx_mt_trigger_thread(x)
+
 #else
-#define BSX_TRACE_ENTRY(object, event, id)
+
+#define BSX_ENTER_CRITICAL_SECTION()
+#define BSX_LEAVE_CRITICAL_SECTION()
+
+#define BSX_MT_TRIGGER_THREAD(x)
+
 #endif
 
-#ifdef BSX_DEVELOPMENT
-char_t bsx_artefact_identification;
-#endif
+
+#endif /* BSX_MULTITHREADING_SUPPORT_H_ */
+
+/** @}*/
 
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* __BSX_USER_DEF_H__ */
-
-/*!@}*/

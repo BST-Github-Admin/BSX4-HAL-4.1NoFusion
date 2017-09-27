@@ -123,6 +123,7 @@ extern "C"
 #if (__STDC_VERSION__ == 201112L)
 #define BSX_COMPILER    (BSX_COMPILER_STDC_C11)
 
+#include <stddef.h>
 #include <stdint.h>
 
 /*! unsigned integer types */
@@ -244,22 +245,59 @@ typedef unsigned long int bsx_size_t; /**< size types */
 
 #endif
 
+/* forward definition of the documentation */
+/*! @typedef float_t
+ * @brief Machine independent type definition for single precision (32 bit) floating-point variables
+ */
+/*! @typedef double_t
+ * @brief Machine independent type definition for double precision (64 bit) floating-point variables
+ */
+
+/* work-around for Microsoft Visual C compilers that do not define float_t and double_t  */
+#if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_METHOD__)
+  #define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
+  #define __TMP_FLT_EVAL_METHOD
+#endif /* FLT_EVAL_METHOD */
+#if defined(__TMP_FLT_EVAL_METHOD)
+  #if FLT_EVAL_METHOD == 0
+    typedef float  float_t;
+    typedef double double_t;
+   #elif FLT_EVAL_METHOD == 1
+    typedef double float_t;
+    typedef double double_t;
+   #elif FLT_EVAL_METHOD == 2
+    typedef long double float_t;
+    typedef long double double_t;
+   #else
+    /* Implementation-defined.  Just make something up, as have no idea what
+     * the implementation does (FP not being Newlib-related, but from the
+     * compiler and/or hardware).  float and double will work, even if they do
+     * not meet the intent of being most efficient.  */
+    typedef float  float_t;
+    typedef double double_t;
+  #endif
+#elif !defined(FLT_EVAL_METHOD)
+    typedef float float_t;
+    typedef double double_t;
+#endif
+#if defined(__TMP_FLT_EVAL_METHOD)
+  #undef FLT_EVAL_METHOD
+#endif
+
+
 /*! @brief Additional basic data types */
-typedef float bsx_f32_t;
-typedef double bsx_f64_t;   /**< float type */
+typedef float_t bsx_f32_t;
+typedef double_t bsx_f64_t;   /**< float type */
 typedef bsx_u8_t bsx_char_t; /**< char type */
 
 typedef int bsx_bool_t; /**< boolean type */
 
-#ifdef __FUSER__
-#define BSX_CONST_DECL const /**< chess_storage(aROMb) */
-#else
-#define BSX_CONST_DECL const    /**< chess_storage(aROMb) */
-#endif
-
 /*! @brief Handling External Data types for signed 64 bit */
-
+#ifndef ENABLE_UC_INTERFACE
 typedef bsx_s64_t bsx_ts_external_t;
+#else
+typedef bsx_s32_t bsx_ts_external_t;
+#endif /* ENABLE_UC_INTERFACE */
 
 /*! @brief structure definition to hold the version information of the software */
 typedef struct
@@ -273,16 +311,20 @@ typedef struct
 /*!
  * @brief Definition of the pointer to the BSX4 library
  */
-typedef bsx_u8_t bsx_instance_t;
+typedef size_t bsx_instance_t;
 
 
 /*!
  * @brief Content of one dimension of a frame in a FIFO data set
  * \note Supports only 32 bit values.
  */
+#ifndef ENABLE_UC_INTERFACE
 typedef union
 {
+#ifdef ENABLE_DOUBLE_PRECISION_OPERATIONS
     bsx_f64_t lfp; /**< long floating-point access  */
+#endif
+
     bsx_u64_t ulli; /**< unsigned long long access */
     bsx_s64_t slli; /**< signed long long  access */
     struct {
@@ -316,6 +358,40 @@ typedef union
         bsx_u32_t reserved; /**< least significant 32bit word of the long word (64bit) */
     } lw; /**< long word (64bit) */
 } bsx_data_content_t;
+#else /* ENABLE_UC_INTERFACE */
+typedef union
+{
+    struct {
+        union {
+            bsx_f32_t sfp; /**< floating-point access  */
+            bsx_s32_t sli; /**< signed integer access */
+            bsx_u32_t uli; /**< unsigned integer access */
+            struct
+            {
+                bsx_s16_t value; /**< signed integer value */
+                bsx_s16_t reserved; /**< reserved */
+            } ssi; /**< signed short integer access */
+            struct
+            {
+                bsx_u16_t value; /**< unsigned integer value */
+                bsx_u16_t reserved; /**< reserved */
+            } usi; /**< unsigned short integer access */
+            struct
+            {
+                bsx_s8_t value; /**< signed integer value */
+                bsx_s8_t reserved0; /**< reserved */
+                bsx_s16_t reserved1; /**< reserved */
+            } sti; /**< signed short integer access */
+            struct
+            {
+                bsx_u8_t value; /**< unsigned integer value */
+                bsx_u8_t reserved0; /**< reserved */
+                bsx_u16_t reserved1; /**< reserved */
+            } uti; /**< unsigned short integer access */
+        } mslw; /**< most significant 32bit word of the long word (64bit) */
+    } lw; /**< to keep the same interface as the 64bit variant */
+} bsx_data_content_t;
+#endif /* ENABLE_UC_INTERFACE */
 
 /*! @brief BSX specific return value */
 typedef bsx_s32_t bsx_return_t;
@@ -363,7 +439,7 @@ bsx_fifo_data_t bsx_##name =                                 \
 /*! @brief Create a global buffer
  *
  * @note Increases the RAM consumption but does affect the stack size. Use \p BSX_CREATE_FIFO_LOCAL to
- *       avoid allocating global variabes. */
+ *       avoid allocating global variables. */
 #define BSX_CREATE_FIFO_GLOBAL(name, type, n_dims, n_frames)   \
 bsx_data_content_t bsx_##name##_buffer_g[(n_dims)*(n_frames)]; \
 bsx_fifo_data_t bsx_##name##_g =                               \

@@ -95,7 +95,6 @@ extern "C"
 #define BSX_CONSTANT_UNIT_SCALING_RADIAN2DEGREE         (57.295779513082320876798154814105f)  //!< \f$ 180/pi \f$
 #define BSX_CONSTANT_UNIT_SCALING_DEGREE2RADION         (0.01745329251994329576923690768489f)   //!< \f$ pi/180 \f$
 
-
 /** @name Special values for sample rates
  *
  * @{
@@ -115,6 +114,12 @@ extern "C"
 /** @} */
 
 
+/*! @brief Number of input signals from physical sensors to BSX */
+#define BSX_PHYSICAL_SENSOR_INPUT_MAX (5)
+
+/*! @brief Number of output signals from virtual sensors by BSX */
+#define BSX_VIRTUAL_SENSOR_OUTPUT_MAX (79)
+
 /*! @brief conversion factors among internal number representation to physical number representation
  *
  * @note The constants provided within the following group shall be used only when the
@@ -133,6 +138,44 @@ extern "C"
 #define BSX_CONSTANT_UNIT_SCALING_MAG_OUTPUT2UTESLA     (0.1f) //!< internal unit [0.1 uT] to [uT]
 #define BSX_CONSTANT_UNIT_SCALING_MAG_UTESLA2OUTPUT     (10.0f) //!< [uT] to internal unit [0.1 uT]
 /*! @} */
+
+
+/*! @name Definition of the dimensionality of signals
+ *
+ * @{
+ */
+/*! @brief Dimensionality of a simple event */
+#define BSX_DIMENSION_EVENT_SIMPLE                  (1)
+/*! @brief Dimensionality of a three dimensional motion vector */
+#define BSX_DIMENSION_MOTION_VECTOR                 (3)
+/*! @brief Dimensionality of a three dimensional motion vector including status */
+#define BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS     (BSX_DIMENSION_MOTION_VECTOR+1)
+
+/*! @brief Dimensionality of the raw acceleration */
+#define BSX_DIMENSION_ACCELERATION_RAW              (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the equalized acceleration */
+#define BSX_DIMENSION_ACCELERATION_EQUALIZED        (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the raw angular rate */
+#define BSX_DIMENSION_ANGULARRATE_RAW               (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the equalized angular rate */
+#define BSX_DIMENSION_ANGULARRATE_EQUALIZED         (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the raw magnetic field */
+#define BSX_DIMENSION_MAGNETICFIELD_RAW             (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the equalized magnetic field */
+#define BSX_DIMENSION_MAGNETICFIELD_EQUALIZED       (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+/*! @brief Dimensionality of the equalization */
+#define BSX_DIMENSION_EQUALIZATION                  (BSX_DIMENSION_MOTION_VECTOR_WITH_STATUS)
+
+/*! @brief Dimensionality of a four dimensional rotation vector represented by a quaternion */
+#define BSX_DIMENSION_ROTATION_QUATERNION           (4)
+/*! @brief Dimensionality of a four dimensional rotation vector represented by a quaternion including a status */
+#define BSX_DIMENSION_ROTATION_QUATERNION_WITH_STATUS (BSX_DIMENSION_ROTATION_QUATERNION+1)
+/*! @brief Dimensionality of a four dimensional orientation vector represented by a Euler angles */
+#define BSX_DIMENSION_ORIENTATION_EULERANGLES       (4)
+/*! @brief Dimensionality of a four dimensional orientation vector represented by a Euler angles including a status*/
+#define BSX_DIMENSION_ORIENTATION_EULERANGLES_WITH_STATUS (BSX_DIMENSION_ORIENTATION_EULERANGLES+1)
+/*! @} */
+
 
 #ifdef __cplusplus
 }

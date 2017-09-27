@@ -118,6 +118,10 @@
 /** @brief More outputs can be returned but not enough memory provided. */
 #define BSX_W_DOSTEPS_EXCESSOUTPUTS   (3)
 
+#define BSX_I_DOSTEPS_NOINPUTDATA   (4)
+
+#define BSX_I_DOSTEPS_NOTHREADLOAD   (5)
+
 /** @brief Invalid sample rate was given (sample rate for event based input, or event enabled for sample rate based). */
 #define BSX_E_SU_WRONGDATARATE   (-10)
 
@@ -144,6 +148,15 @@
 
 /** @brief Subscribed output gates have been returned. */
 #define BSX_I_SU_SUBSCRIBEDOUTPUTGATES   (12)
+
+/** @brief Subscribed input gates have been returned. */
+#define BSX_I_SU_SUBSCRIBEDINPUTGATES   (13)
+
+/** @brief Running out of instances. Library initialized too often. */
+#define BSX_E_INSTANCE_COUNT_EXCEEDED   (-250)
+
+/** @brief Disables specific gates for particular mode */
+#define BSX_E_SU_OUTPUTDISABLED   (-16)
 
 /** @brief Operation aborted.  */
 #define BSX_E_ABORT   (-252)
@@ -195,9 +208,6 @@
 
 /** @brief Invalid property identifier used in setting of configuration or state. */
 #define BSX_E_SET_INVALIDPROPERTY   (-101)
-
-/** @brief Invalid function identifier. (deprecated) */
-#define BSX_E_INVALIDFUNCTION   (-102)
 
 /** @brief Invalid value. */
 #define BSX_E_SET_INVALIDVALUE   (-103)
