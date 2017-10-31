@@ -51,7 +51,7 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/hal\
 
 LOCAL_CFLAGS := -pthread\
 
-LOCAL_CPPFLAGS := -pthread\
+LOCAL_CPPFLAGS := -pthread -Wno-date-time\
 
 LOCAL_LDLIBS += -lm -llog -lutils
 #LOCAL_SHARED_LIBRARIES := libm
