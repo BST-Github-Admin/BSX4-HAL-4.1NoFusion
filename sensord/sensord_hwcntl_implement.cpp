@@ -1400,27 +1400,21 @@ static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
 {
     int32_t i;
     int32_t ret;
-    struct input_event event[4];
+    struct input_event event[6];
     struct timespec tmspec;
-    int64_t sys_tm = 0;
     HW_DATA_UNION *p_hwdata;
 
     while( (ret = read(acc_input_fd, event, sizeof(event))) > 0)
     {
-        if(EV_MSC != event[0].type || EV_MSC != event[1].type || EV_MSC != event[2].type || EV_SYN != event[3].type)
+        if(EV_MSC != event[0].type || EV_MSC != event[1].type || EV_MSC != event[2].type || EV_MSC != event[3].type ||
+                EV_MSC != event[4].type || EV_SYN != event[5].type)
         {
-            PWARN("Unexpected events: %d, %d; %d, %d; %d, %d; %d;",
+            PWARN("Unexpected events: %d, %d; %d, %d; %d, %d; %d, %d; %d, %d; %d;",
                     event[0].type, event[0].code, event[1].type, event[1].code, event[2].type, event[2].code,
-                    event[3].type);
+                    event[3].type, event[3].code, event[4].type, event[4].code,
+                    event[5].type);
             continue;
         }
-
-#if !defined(PLTF_LINUX_ENABLED)
-        sys_tm = android::elapsedRealtimeNano();
-#else
-        clock_gettime(CLOCK_MONOTONIC, &tmspec);
-        sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
-#endif
 
         p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
         if (NULL == p_hwdata)
@@ -1430,10 +1424,10 @@ static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
         }
 
         p_hwdata->id = SENSOR_TYPE_ACCELEROMETER;
-        p_hwdata->x = event[0].value * BMA255_acc_resl;
-        p_hwdata->y = event[1].value * BMA255_acc_resl;
-        p_hwdata->z = event[2].value * BMA255_acc_resl;
-        p_hwdata->timestamp = sys_tm;
+        p_hwdata->x = event[2].value * BMA255_acc_resl;
+        p_hwdata->y = event[3].value * BMA255_acc_resl;
+        p_hwdata->z = event[4].value * BMA255_acc_resl;
+        p_hwdata->timestamp = event[0].value * 1000000000LL +  event[1].value;
 
         hw_remap_sensor_data(&(p_hwdata->x), &(p_hwdata->y), &(p_hwdata->z), g_place_a);
 
@@ -1455,27 +1449,21 @@ static void ap_hw_poll_bmg160(BstSimpleList *dest_list)
 
     int32_t i;
     int32_t ret;
-    struct input_event event[4];
+    struct input_event event[6];
     struct timespec tmspec;
-    int64_t sys_tm = 0;
     HW_DATA_UNION *p_hwdata;
 
     while( (ret = read(gyr_input_fd, event, sizeof(event))) > 0)
     {
-        if(EV_MSC != event[0].type || EV_MSC != event[1].type || EV_MSC != event[2].type || EV_SYN != event[3].type)
+        if(EV_MSC != event[0].type || EV_MSC != event[1].type || EV_MSC != event[2].type || EV_MSC != event[3].type ||
+                EV_MSC != event[4].type || EV_SYN != event[5].type)
         {
-            PWARN("Unexpected events: %d, %d; %d, %d; %d, %d; %d;",
+            PWARN("Unexpected events: %d, %d; %d, %d; %d, %d; %d, %d; %d, %d; %d;",
                     event[0].type, event[0].code, event[1].type, event[1].code, event[2].type, event[2].code,
-                    event[3].type);
+                    event[3].type, event[3].code, event[4].type, event[4].code,
+                    event[5].type);
             continue;
         }
-
-//#if !defined(PLTF_LINUX_ENABLED)
-//        sys_tm = android::elapsedRealtimeNano();
-//#else
-        clock_gettime(CLOCK_MONOTONIC, &tmspec);
-        sys_tm = tmspec.tv_sec * 1000000000 + tmspec.tv_nsec;
-//#endif
 
         p_hwdata = (HW_DATA_UNION *) calloc(1, sizeof(HW_DATA_UNION));
         if (NULL == p_hwdata)
@@ -1485,10 +1473,10 @@ static void ap_hw_poll_bmg160(BstSimpleList *dest_list)
         }
 
         p_hwdata->id = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
-        p_hwdata->x_uncalib = event[0].value;
-        p_hwdata->y_uncalib = event[1].value;
-        p_hwdata->z_uncalib = event[2].value;
-        p_hwdata->timestamp = sys_tm;
+        p_hwdata->x_uncalib = event[2].value;
+        p_hwdata->y_uncalib = event[3].value;
+        p_hwdata->z_uncalib = event[4].value;
+        p_hwdata->timestamp = event[0].value * 1000000000LL +  event[1].value;
 
         hw_remap_sensor_data(&(p_hwdata->x_uncalib), &(p_hwdata->y_uncalib), &(p_hwdata->z_uncalib), g_place_g);
 
