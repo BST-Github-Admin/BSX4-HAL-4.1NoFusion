@@ -1339,7 +1339,7 @@ int activate_configref_resort(int32_t bsx_list_index, int32_t is_enable)
             if (is_enable)
             {
                 /*find a blank and insert the current */
-                p_config_refers[i] = &p_config[bsx_list_index - bsx_listinx_base];
+                p_config_refers[i] = &p_config[(long)(bsx_list_index - bsx_listinx_base)];
                 (*p_active_sensor_cnt)++;
 
                 return 1;
@@ -1365,7 +1365,7 @@ int activate_configref_resort(int32_t bsx_list_index, int32_t is_enable)
             {
                 (*p_active_sensor_cnt)--;
 
-                memmove(&p_config_refers[i], &p_config_refers[i+1],
+                memmove(&p_config_refers[i], &p_config_refers[(long)(i+1)],
                         ((int)(*p_active_sensor_cnt) - i) * sizeof(p_config_refers[0]));
                 p_config_refers[*p_active_sensor_cnt] = NULL;
 
@@ -1375,11 +1375,11 @@ int activate_configref_resort(int32_t bsx_list_index, int32_t is_enable)
         {
             if (is_enable)
             {
-                memmove(&p_config_refers[i+1], &p_config_refers[i],
+                memmove(&p_config_refers[(long)(i+1)], &p_config_refers[i],
                         ((int)(*p_active_sensor_cnt) - i) * sizeof(p_config_refers[0]));
 
                 /*insert the current */
-                p_config_refers[i] = &p_config[bsx_list_index - bsx_listinx_base];
+                p_config_refers[i] = &p_config[(long)(bsx_list_index - bsx_listinx_base)];
                 (*p_active_sensor_cnt)++;
 
                 return 1;
@@ -1439,11 +1439,11 @@ int batch_configref_resort(int32_t bsx_list_index, int64_t sampling_period_ns, i
         }
     }
 
-    p_config[bsx_list_index - bsx_listinx_base].data_rate = encode_datarate(sampling_period_ns);
+    p_config[(long)(bsx_list_index - bsx_listinx_base)].data_rate = encode_datarate(sampling_period_ns);
     encode_max_latency(max_report_latency_ns,
-            &(p_config[bsx_list_index - bsx_listinx_base].max_latency),
-            &(p_config[bsx_list_index - bsx_listinx_base].latency_unit));
-    p_config[bsx_list_index - bsx_listinx_base].delay_onchange_Hz = delay_Hz;
+            &(p_config[(long)(bsx_list_index - bsx_listinx_base)].max_latency),
+            &(p_config[(long)(bsx_list_index - bsx_listinx_base)].latency_unit));
+    p_config[(long)(bsx_list_index - bsx_listinx_base)].delay_onchange_Hz = delay_Hz;
 
     return 0;
 
@@ -1559,7 +1559,9 @@ void open_input_by_name(const char *event_name, int *p_fd, int *p_num)
         if (fd >= 0)
         {
             char name[80];
-            if (ioctl(fd, EVIOCGNAME(sizeof(name) - 1), &name) < 1)
+            //lint -e569
+            /*EVIOCGNAME comes from linux/input.h*/
+            if (ioctl(fd, EVIOCGNAME((sizeof(name) - 1)), &name[0]) < 1)
             {
                 name[0] = '\0';
             }
@@ -1576,7 +1578,7 @@ void open_input_by_name(const char *event_name, int *p_fd, int *p_num)
         }
     }
 
-    closedir(dir);
+    (void)closedir(dir);
 
     if (fd < 0)
     {
@@ -1601,7 +1603,7 @@ void *hwcntl_main(void *arg)
     {
         while (1)
         {
-            bst_sensor->pfun_hw_deliver_sensordata(bst_sensor);
+            (void)bst_sensor->pfun_hw_deliver_sensordata(bst_sensor);
         }
     }
 

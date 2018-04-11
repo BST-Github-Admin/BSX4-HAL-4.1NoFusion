@@ -130,50 +130,25 @@
 typedef struct
 {
     uint32_t id;
+
+    float x;
+    float y;
+    float z;
+
     union
     {
-        struct
-        {
-            float x;
-            float y;
-            float z;
-        };
-        struct
-        {
-            float azimuth;
-            float pitch;
-            float roll;
-        }; //for ORIENTATION
         float pressure;
         float temperature;
         float data[4]; // for RV, Game RV, ALSH debug raw data
-        struct
-        {
-            float x_uncalib;
-            float y_uncalib;
-            float z_uncalib;
-            float x_bias;
-            float y_bias;
-            float z_bias;
-        }; //for GYROSCOPE/MAGNETIC UNCALIBRATED
         uint64_t step_counter;
-        struct
-        {
-            float heart_rate_bpm;
-            int8_t heart_rate_status;
-        };
         float relative_humidity;
         float ambient_temperature;
         float light;
         float proximity;
-
-        //ALSH private virtual sensor
-        int32_t power_consumption;
-        int32_t activity_wakeup;
     };
 
-    int8_t accuracy;
     int64_t timestamp;
+
 } HW_DATA_UNION;
 
 /* this path must exist and user <system> must have permission to write to it */

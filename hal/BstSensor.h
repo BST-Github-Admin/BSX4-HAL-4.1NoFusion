@@ -104,7 +104,7 @@ typedef struct
 {
     pthread_mutex_t mutex;
     pthread_cond_t cond;
-    BstSimpleList *p_list;
+    BstSimpleList list;
 } SENSORD_SHARED_MEM;
 
 class BstSensor
@@ -133,13 +133,13 @@ public:
     uint32_t (*pfun_get_sensorlist)(struct sensor_t const** p_sSensorList);
     uint32_t (*pfun_hw_deliver_sensordata)(BstSensor *bstsensor);
 
-    BstSimpleList *tmplist_hwcntl_acclraw;
-    BstSimpleList *tmplist_hwcntl_gyroraw;
-    BstSimpleList *tmplist_hwcntl_magnraw;
+    BstSimpleList tmplist_hwcntl_acclraw;
+    BstSimpleList tmplist_hwcntl_gyroraw;
+    BstSimpleList tmplist_hwcntl_magnraw;
 
-    BstSimpleList *tmplist_sensord_acclraw;
-    BstSimpleList *tmplist_sensord_gyroraw;
-    BstSimpleList *tmplist_sensord_magnraw;
+    BstSimpleList tmplist_sensord_acclraw;
+    BstSimpleList tmplist_sensord_gyroraw;
+    BstSimpleList tmplist_sensord_magnraw;
 
     SENSORD_SHARED_MEM shmem_hwcntl;
     int HALpipe_fd[2];

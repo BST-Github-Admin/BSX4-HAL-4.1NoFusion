@@ -116,7 +116,6 @@ public:
     int list_add_rear(void *pdata);
     void list_get_headdata(void **ppdata);
     int list_mount_rear(BstSimpleList *list_for_mnt);
-    int list_clean();
 
     struct list_node *head;
     struct list_node *tail;

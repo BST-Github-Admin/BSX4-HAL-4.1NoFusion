@@ -90,7 +90,6 @@
 #include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
-#include <stdarg.h>
 
 #include "BstSensor.h"
 
@@ -325,7 +324,8 @@ static void distory_hwdata(HW_DATA_UNION **pp_hwdata, uint32_t hwdata_len)
     free(pp_hwdata);
 }
 
-
+//lint -sem(BstSensor::sensord_deliver_event, custodial(1))  -e593
+/*p_event is handled by BstSensor::sensord_deliver_event and freed by Android framework*/
 void sensord_algo_process(BstSensor *bstsensor)
 {
     uint32_t i;
@@ -348,13 +348,13 @@ void sensord_algo_process(BstSensor *bstsensor)
     uint32_t gyr_has_input = 0;
     uint32_t input_package_index = 0;
     sensors_event_t *p_event = NULL;
-    BSX_DATALOG_BUF acc_log_data;
-    BSX_DATALOG_BUF gyr_log_data;
-    BSX_DATALOG_BUF mag_log_data;
+    BSX_DATALOG_BUF acc_log_data = {0,0,0,0};
+    BSX_DATALOG_BUF gyr_log_data = {0,0,0,0};
+    BSX_DATALOG_BUF mag_log_data = {0,0,0,0};
 
-    if(0 == bstsensor->tmplist_sensord_acclraw->list_len +
-            bstsensor->tmplist_sensord_gyroraw->list_len +
-            bstsensor->tmplist_sensord_magnraw->list_len)
+    if(0 == bstsensor->tmplist_sensord_acclraw.list_len +
+            bstsensor->tmplist_sensord_gyroraw.list_len +
+            bstsensor->tmplist_sensord_magnraw.list_len)
     {
         return;
     }
@@ -362,24 +362,24 @@ void sensord_algo_process(BstSensor *bstsensor)
     /**
      * Step 1 save the hardware data and generate align indication array
      */
-    if(bstsensor->tmplist_sensord_acclraw->list_len)
+    if(bstsensor->tmplist_sensord_acclraw.list_len)
     {
-        pp_ACC_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_acclraw->list_len * sizeof(HW_DATA_UNION *));
+        pp_ACC_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_acclraw.list_len * sizeof(HW_DATA_UNION *));
         if(NULL == pp_ACC_hwdata)
         {
             PWARN("malloc fail");
             return;
         }
 
-        ACC_hwdata_len = bstsensor->tmplist_sensord_acclraw->list_len;
+        ACC_hwdata_len = bstsensor->tmplist_sensord_acclraw.list_len;
         for (i = 0; i < ACC_hwdata_len; ++i) {
-            bstsensor->tmplist_sensord_acclraw->list_get_headdata((void **) &(pp_ACC_hwdata[i]));
+            bstsensor->tmplist_sensord_acclraw.list_get_headdata((void **) &(pp_ACC_hwdata[i]));
         }
     }
 
-    if(bstsensor->tmplist_sensord_magnraw->list_len)
+    if(bstsensor->tmplist_sensord_magnraw.list_len)
     {
-        pp_MAG_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_magnraw->list_len * sizeof(HW_DATA_UNION *));
+        pp_MAG_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_magnraw.list_len * sizeof(HW_DATA_UNION *));
         if(NULL == pp_MAG_hwdata)
         {
             PWARN("malloc fail");
@@ -387,15 +387,15 @@ void sensord_algo_process(BstSensor *bstsensor)
             return;
         }
 
-        MAG_hwdata_len = bstsensor->tmplist_sensord_magnraw->list_len;
+        MAG_hwdata_len = bstsensor->tmplist_sensord_magnraw.list_len;
         for (i = 0; i < MAG_hwdata_len; ++i) {
-            bstsensor->tmplist_sensord_magnraw->list_get_headdata((void **) &(pp_MAG_hwdata[i]));
+            bstsensor->tmplist_sensord_magnraw.list_get_headdata((void **) &(pp_MAG_hwdata[i]));
         }
     }
 
-    if(bstsensor->tmplist_sensord_gyroraw->list_len)
+    if(bstsensor->tmplist_sensord_gyroraw.list_len)
     {
-        pp_GYRO_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_gyroraw->list_len * sizeof(HW_DATA_UNION *));
+        pp_GYRO_hwdata = (HW_DATA_UNION **)malloc(bstsensor->tmplist_sensord_gyroraw.list_len * sizeof(HW_DATA_UNION *));
         if(NULL == pp_GYRO_hwdata)
         {
             PWARN("malloc fail");
@@ -404,9 +404,9 @@ void sensord_algo_process(BstSensor *bstsensor)
             return;
         }
 
-        GYRO_hwdata_len = bstsensor->tmplist_sensord_gyroraw->list_len;
+        GYRO_hwdata_len = bstsensor->tmplist_sensord_gyroraw.list_len;
         for (i = 0; i < GYRO_hwdata_len; ++i) {
-            bstsensor->tmplist_sensord_gyroraw->list_get_headdata((void **) &(pp_GYRO_hwdata[i]));
+            bstsensor->tmplist_sensord_gyroraw.list_get_headdata((void **) &(pp_GYRO_hwdata[i]));
         }
     }
 
@@ -440,35 +440,41 @@ void sensord_algo_process(BstSensor *bstsensor)
 
         if(p_align_ind[i] & HAS_ACC)
         {
-            acc_has_input = 1;
-            accel_sli_in_xyz[0].lw.mslw.sli = pp_ACC_hwdata[ACC_hwdata_index]->x;
-            accel_sli_in_xyz[1].lw.mslw.sli = pp_ACC_hwdata[ACC_hwdata_index]->y;
-            accel_sli_in_xyz[2].lw.mslw.sli = pp_ACC_hwdata[ACC_hwdata_index]->z;
-            accel_in_data.time_stamp = (bsx_ts_external_t) (pp_ACC_hwdata[ACC_hwdata_index]->timestamp);
-            accel_in_data.sensor_id = BSX_INPUT_ID_ACCELERATION;
-            ACC_hwdata_index++;
+            if(pp_ACC_hwdata){
+                acc_has_input = 1;
+                accel_sli_in_xyz[0].lw.mslw.sli = (bsx_s32_t)pp_ACC_hwdata[ACC_hwdata_index]->x;
+                accel_sli_in_xyz[1].lw.mslw.sli = (bsx_s32_t)pp_ACC_hwdata[ACC_hwdata_index]->y;
+                accel_sli_in_xyz[2].lw.mslw.sli = (bsx_s32_t)pp_ACC_hwdata[ACC_hwdata_index]->z;
+                accel_in_data.time_stamp = (bsx_ts_external_t) (pp_ACC_hwdata[ACC_hwdata_index]->timestamp);
+                accel_in_data.sensor_id = BSX_INPUT_ID_ACCELERATION;
+                ACC_hwdata_index++;
+            }
         }
 
         if(p_align_ind[i] & HAS_MAG)
         {
-            mag_has_input = 1;
-            mag_sli_in_xyz[0].lw.mslw.sli = pp_MAG_hwdata[MAG_hwdata_index]->x;
-            mag_sli_in_xyz[1].lw.mslw.sli = pp_MAG_hwdata[MAG_hwdata_index]->y;
-            mag_sli_in_xyz[2].lw.mslw.sli = pp_MAG_hwdata[MAG_hwdata_index]->z;
-            mag_in_data.time_stamp = (bsx_ts_external_t) (pp_MAG_hwdata[MAG_hwdata_index]->timestamp);
-            mag_in_data.sensor_id = BSX_INPUT_ID_MAGNETICFIELD;
-            MAG_hwdata_index++;
+            if(pp_MAG_hwdata){
+                mag_has_input = 1;
+                mag_sli_in_xyz[0].lw.mslw.sli = (bsx_s32_t)pp_MAG_hwdata[MAG_hwdata_index]->x;
+                mag_sli_in_xyz[1].lw.mslw.sli = (bsx_s32_t)pp_MAG_hwdata[MAG_hwdata_index]->y;
+                mag_sli_in_xyz[2].lw.mslw.sli = (bsx_s32_t)pp_MAG_hwdata[MAG_hwdata_index]->z;
+                mag_in_data.time_stamp = (bsx_ts_external_t) (pp_MAG_hwdata[MAG_hwdata_index]->timestamp);
+                mag_in_data.sensor_id = BSX_INPUT_ID_MAGNETICFIELD;
+                MAG_hwdata_index++;
+            }
         }
 
         if(p_align_ind[i] & HAS_GYR)
         {
-            gyr_has_input = 1;
-            ang_sli_in_xyz[0].lw.mslw.sli = pp_GYRO_hwdata[GYRO_hwdata_index]->x;
-            ang_sli_in_xyz[1].lw.mslw.sli = pp_GYRO_hwdata[GYRO_hwdata_index]->y;
-            ang_sli_in_xyz[2].lw.mslw.sli = pp_GYRO_hwdata[GYRO_hwdata_index]->z;
-            ang_in_data.time_stamp = (bsx_ts_external_t) (pp_GYRO_hwdata[GYRO_hwdata_index]->timestamp);
-            ang_in_data.sensor_id = BSX_INPUT_ID_ANGULARRATE;
-            GYRO_hwdata_index++;
+            if(pp_GYRO_hwdata){
+                gyr_has_input = 1;
+                ang_sli_in_xyz[0].lw.mslw.sli = (bsx_s32_t)pp_GYRO_hwdata[GYRO_hwdata_index]->x;
+                ang_sli_in_xyz[1].lw.mslw.sli = (bsx_s32_t)pp_GYRO_hwdata[GYRO_hwdata_index]->y;
+                ang_sli_in_xyz[2].lw.mslw.sli = (bsx_s32_t)pp_GYRO_hwdata[GYRO_hwdata_index]->z;
+                ang_in_data.time_stamp = (bsx_ts_external_t) (pp_GYRO_hwdata[GYRO_hwdata_index]->timestamp);
+                ang_in_data.sensor_id = BSX_INPUT_ID_ANGULARRATE;
+                GYRO_hwdata_index++;
+            }
         }
 
         input_package_index = 0;
@@ -585,6 +591,8 @@ void sensord_algo_process(BstSensor *bstsensor)
 
                 switch(library_in_package[j].sensor_id)
                 {
+                    /*PClint cannot read C++11 definition of struct*/
+                    //lint -e63 -e40 -e1013
                     case BSX_INPUT_ID_ACCELERATION:
                         p_event->sensor = BSX_SENSOR_ID_ACCELEROMETER;
                         p_event->type = SENSOR_TYPE_ACCELEROMETER;
@@ -626,117 +634,4 @@ void sensord_algo_process(BstSensor *bstsensor)
     return;
 }
 
-
-uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3], int64_t *pre_tm, uint32_t counter)
-{
-  uint8_t statusBit;
-  int32_t x_in_tmp, y_in_tmp, z_in_tmp;
-  int64_t tm_in_tmp;
-  uint32_t sampleNumber;
-  bool guard1 = false;
-  int32_t  x0, y0, z0;
-  int32_t  x1, y1, z1;
-  int64_t t0;
-  int64_t t1;
-
-  x_in_tmp = data[0];
-  y_in_tmp = data[1];
-  z_in_tmp = data[2];
-  tm_in_tmp = tm[0];
-
-  sampleNumber = counter % 5U;
-  guard1 = false;
-
-  switch (sampleNumber) {
-   case 0U:
-    statusBit = 1;
-    data[0] = pre_data[0];
-    data[1] = pre_data[1];
-    data[2] = pre_data[2];
-    tm[0] = pre_tm[0];
-    break;
-
-   case 1U:
-    guard1 = true;
-    break;
-
-   case 2U:
-    guard1 = true;
-    break;
-
-   case 3U:
-    guard1 = true;
-    break;
-
-   case 4U:
-    statusBit = 0;
-    break;
-  }
-
-  if (guard1)
-  {
-    statusBit = 1;
-    x0 = (pre_data[0] < 0x7FFFFFFD ? pre_data[0] : 0x7FFFFFFD);
-    y0 = (pre_data[1] < 0x7FFFFFFD ? pre_data[1] : 0x7FFFFFFD);
-    z0 = (pre_data[2] < 0x7FFFFFFD ? pre_data[2] : 0x7FFFFFFD);
-    x1 = (data[0] < 0x7FFFFFFD ? data[0] : 0x7FFFFFFD);
-    y1 = (data[1] < 0x7FFFFFFD ? data[1] : 0x7FFFFFFD);
-    z1 = (data[2] < 0x7FFFFFFD ? data[2] : 0x7FFFFFFD);
-
-    data[0] = (4 - (int32_t)sampleNumber) * ((x0 + 2) >> 2) + (int32_t)sampleNumber * ((x1 + 2) >> 2);
-    data[1] = (4 - (int32_t)sampleNumber) * ((y0 + 2) >> 2) + (int32_t)sampleNumber * ((y1 + 2) >> 2);
-    data[2] = (4 - (int32_t)sampleNumber) * ((z0 + 2) >> 2) + (int32_t)sampleNumber * ((z1 + 2) >> 2);
-
-    t0 = (pre_tm[0] < 0x7FFFFFFFFFFFFFFD ? pre_tm[0] : 0x7FFFFFFFFFFFFFFD);
-    t1 = (tm[0] < 0x7FFFFFFFFFFFFFFD ? tm[0] : 0x7FFFFFFFFFFFFFFD);
-
-    tm[0] = (4LL - sampleNumber) * ((t0 + 2LL) >> 2LL) + sampleNumber * ((t1 +2LL) >> 2LL);
-  }
-
-  pre_data[0] = x_in_tmp;
-  pre_data[1] = y_in_tmp;
-  pre_data[2] = z_in_tmp;
-  pre_tm[0] = tm_in_tmp;
-
-  return statusBit;
-}
-
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-void ladon_assert(int condition, char *file_name, char *function_name, int line_number, char *format_string_p, ...)
-{
-    if (!condition)
-    {
-        char message_buffer[1024];
-        va_list variable_argument_list_p;
-
-        va_start(variable_argument_list_p, format_string_p);
-        vsprintf(message_buffer, format_string_p, variable_argument_list_p);
-        va_end(variable_argument_list_p);
-
-        PLADON("Assertion failed in file [%s]\n at function %s on line %d with message:\n\"%s\"",
-               file_name, function_name, line_number, message_buffer);
-    }
-}
-
-void ladon_warning(char *file_name, char *function_name, int line_number, char *format_string_p, ...)
-{
-    char message_buffer[1024];
-    va_list variable_argument_list_p;
-
-    va_start(variable_argument_list_p, format_string_p);
-    vsprintf(message_buffer, format_string_p, variable_argument_list_p);
-    va_end(variable_argument_list_p);
-
-    PLADON("Warning issued in file [%s]\n at function %s on line %d with message:\n\"%s\"",
-           file_name, function_name, line_number, message_buffer);
-}
-
-#ifdef __cplusplus
-}
-#endif
 

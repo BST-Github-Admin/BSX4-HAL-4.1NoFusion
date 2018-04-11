@@ -138,20 +138,8 @@ extern "C"
 #define UNUSED_PARAM(param) ((void)(param))
 #define __unused__ __attribute__((unused))
 
-    void get_token_pairs(const char *psz_line, char seperator,
-            char *ptoken_l, char *ptoken_r);
-    int get_gcd(int a, int b);
-    int32_t get_nearest_divisible_int(uint32_t a, uint32_t b);
-    /* get number of 1s (set bits) in a u32 integer */
-    int get_num_set_bits_u32(uint32_t n);
-
-    void debug_mem(unsigned char *addr, uint32_t len);
-    int bst_pthread_mutex_timedlock(pthread_mutex_t *mutex, uint32_t msecs);
-    int bst_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, uint32_t usecs);
-//int bst_pthread_sigqueue(pthread_t thread, int sig, const union sigval value);
-    uint32_t sensord_popcount_32(uint32_t x);
-    uint32_t sensord_popcount_64(uint64_t x);
-    uint32_t sensord_popcount_less1(uint64_t x);
+void debug_mem(unsigned char *addr, uint32_t len);
+uint32_t sensord_popcount_64(uint64_t x);
 
 #ifdef __cplusplus
 }

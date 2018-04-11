@@ -88,7 +88,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <time.h>
 #include <errno.h>
 #include <dirent.h>
@@ -138,7 +137,7 @@ static inline void storage_init()
     {
         printf("error creating storage dir\n");
     }
-    chmod(path, 0766); //notice the "umask" could mask some privilege when mkdir
+    (void)chmod(path, 0766); //notice the "umask" could mask some privilege when mkdir
 
     return;
 }
@@ -153,7 +152,7 @@ void sensord_trace_init()
         return;
     }
 
-    chmod(SENSORD_TRACE_FILE, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+    (void)chmod(SENSORD_TRACE_FILE, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 
     return;
 }
@@ -164,7 +163,7 @@ int64_t sensord_get_tmstmp_ns(void)
     int64_t ap_time;
     struct timespec ts;
 
-    clock_gettime(CLOCK_BOOTTIME, &ts);
+    (void)clock_gettime(CLOCK_BOOTTIME, &ts);
     ap_time = (int64_t) ts.tv_sec * 1000000000 + ts.tv_nsec;
 
     return ap_time;
@@ -174,6 +173,8 @@ int64_t sensord_get_tmstmp_ns(void)
 void trace_log(uint32_t level, const char *fmt, ...)
 {
     int ret = 0;
+    //lint -esym(530, ap)
+    /*ap is a type of va_list*/
     va_list ap;
 #if !defined(PLTF_LINUX_ENABLED)
     char buffer[256] = { 0 };
@@ -192,7 +193,7 @@ void trace_log(uint32_t level, const char *fmt, ...)
 
         // otherwise, data is buffered rather than be wrote to file
         // therefore when stopped by signal, NO data left in file!
-        fflush(g_fp_trace);
+        (void)fflush(g_fp_trace);
 
         if (ret < 0)
         {
@@ -211,28 +212,28 @@ void trace_log(uint32_t level, const char *fmt, ...)
 #define BST_LOG_TAG    "sensord"
 
         va_start(ap, fmt);
-        vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
+        (void)vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
         va_end(ap);
 
         switch (level)
         {
             case LOG_LEVEL_N:
-                __android_log_print(ANDROID_LOG_FATAL, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_FATAL, BST_LOG_TAG, "%s", buffer);
                 break;
             case LOG_LEVEL_E:
-                __android_log_print(ANDROID_LOG_ERROR, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_ERROR, BST_LOG_TAG, "%s", buffer);
                 break;
             case LOG_LEVEL_W:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
                 break;
             case LOG_LEVEL_I:
-                __android_log_print(ANDROID_LOG_INFO, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_INFO, BST_LOG_TAG, "%s", buffer);
                 break;
             case LOG_LEVEL_D:
-                __android_log_print(ANDROID_LOG_DEBUG, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_DEBUG, BST_LOG_TAG, "%s", buffer);
                 break;
             case LOG_LEVEL_LADON:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
+                (void)__android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
                 break;
             default:
                 break;
@@ -266,14 +267,14 @@ static void generic_data_log(const char*dest_path, FILE **p_dest_fp, char *info_
             return;
         }
 
-        chmod(dest_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+        (void)chmod(dest_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     }
 
     fprintf((*p_dest_fp), "%s", info_str);
 
     // otherwise, data is buffered rather than be wrote to file
     // therefore when stopped by signal, NO data left in file!
-    fflush((*p_dest_fp));
+    (void)fflush((*p_dest_fp));
 
 }
 

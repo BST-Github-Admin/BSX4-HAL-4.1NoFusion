@@ -88,6 +88,6 @@
 #define __SENSORD_H
 
 void *sensord_main(void *arg);
-void sensord_sighandler(int signo, siginfo_t *sig_info, void *ctx);
+void sensord_sighandler(int signo, struct siginfo *sig_info, void *ctx);
 
 #endif

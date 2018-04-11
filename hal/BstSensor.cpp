@@ -97,17 +97,15 @@
 #include "BstSensor.h"
 #include "bsx_android.h"
 #include "sensord_pltf.h"
-#include "sensord_cfg.h"
 #include "sensord_algo.h"
 #include "sensord.h"
 #include "sensord_hwcntl.h"
-#include "util_misc.h"
 
 static struct sigaction oldact;
 
 static void sensord_sigact_enable()
 {
-    int ret = 0;
+    int ret;
     struct sigaction sigact;
 
     memset(&sigact, 0, sizeof(struct sigaction));
@@ -147,28 +145,18 @@ BstSensor::BstSensor()
         PERR("create HAL pipe fail, errno = %d(%s)!", errno, strerror(errno));
         return;
     }
-    fcntl(HALpipe_fd[0], F_SETFL, O_NONBLOCK);
 
-    shmem_hwcntl.p_list = new BstSimpleList();
-    pthread_mutex_init(&shmem_hwcntl.mutex, NULL);
-    pthread_cond_init(&shmem_hwcntl.cond, NULL);
-
-    tmplist_sensord_acclraw = new BstSimpleList();
-    tmplist_sensord_gyroraw = new BstSimpleList();
-    tmplist_sensord_magnraw = new BstSimpleList();
-
-    tmplist_hwcntl_acclraw = new BstSimpleList();
-    tmplist_hwcntl_gyroraw = new BstSimpleList();
-    tmplist_hwcntl_magnraw = new BstSimpleList();
+    (void)pthread_mutex_init(&shmem_hwcntl.mutex, NULL);
+    (void)pthread_cond_init(&shmem_hwcntl.cond, NULL);
 
     /**
      * Because hwcntl will also call algo library interface,
      * so the initialization must be finished before creating threads
      * BSX Lib initialization
      * */
-    sensord_bsx_init();
+    (void)sensord_bsx_init();
 
-    pthread_create(&thread_sensord, NULL, sensord_main, this);
+    (void)pthread_create(&thread_sensord, NULL, sensord_main, this);
 
     ret = hwcntl_init(this);
     if (ret){
@@ -176,7 +164,7 @@ BstSensor::BstSensor()
         return;
     }
 
-    pthread_create(&thread_hwcntl, NULL, hwcntl_main, this);
+    (void)pthread_create(&thread_hwcntl, NULL, hwcntl_main, this);
 
     return;
 }
@@ -192,17 +180,16 @@ BstSensor::BstSensor(const BstSensor & other)
 
 BstSensor::~BstSensor()
 {
-    pthread_kill(thread_sensord, SIGTERM);
-    pthread_kill(thread_hwcntl, SIGTERM);
+    (void)pthread_kill(thread_sensord, SIGTERM);
+    (void)pthread_kill(thread_hwcntl, SIGTERM);
 
-    pthread_join(thread_sensord, NULL);
-    pthread_join(thread_hwcntl, NULL);
+    (void)pthread_join(thread_sensord, NULL);
+    (void)pthread_join(thread_hwcntl, NULL);
 
-    sigaction(SIGTERM, &oldact, NULL);
+    (void)sigaction(SIGTERM, &oldact, NULL);
 
-    pthread_mutex_destroy(&shmem_hwcntl.mutex);
-    pthread_cond_destroy(&shmem_hwcntl.cond);
-    delete shmem_hwcntl.p_list;
+    (void)pthread_mutex_destroy(&shmem_hwcntl.mutex);
+    (void)pthread_cond_destroy(&shmem_hwcntl.cond);
 
     close(HALpipe_fd[0]);
     close(HALpipe_fd[1]);
@@ -217,14 +204,6 @@ BstSensor::~BstSensor()
     {
         free(bst_sensorlist.bsx_list_index);
     }
-
-    delete tmplist_sensord_acclraw;
-    delete tmplist_sensord_gyroraw;
-    delete tmplist_sensord_magnraw;
-
-    delete tmplist_hwcntl_acclraw;
-    delete tmplist_hwcntl_gyroraw;
-    delete tmplist_hwcntl_magnraw;
 }
 
 BstSensor *BstSensor::instance = NULL;
@@ -345,6 +324,6 @@ int BstSensor::read_events(sensors_event_t* data, int count)
         return 0;
     }
 
-    return (ret / sizeof(sensors_event_t));
+    return ((unsigned int)ret / sizeof(sensors_event_t));
 }
 

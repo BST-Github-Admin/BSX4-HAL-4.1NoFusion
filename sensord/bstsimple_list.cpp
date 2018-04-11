@@ -94,14 +94,25 @@ BstSimpleList::BstSimpleList()
     head = NULL;
     tail = NULL;
     list_len = 0;
-    set_uplimit(DEFAULT_LIST_LEN);
+    uplimit = DEFAULT_LIST_LEN;
 
     return;
 }
 
 BstSimpleList::~BstSimpleList()
 {
-    list_clean();
+    void *pdata = NULL;
+
+    while(NULL != head){
+        pdata = head->p_data;
+        head = head->next;
+	    free(pdata);
+    }
+
+    head = NULL;
+    tail = NULL;
+    list_len = 0;
+
     return;
 }
 
@@ -116,6 +127,9 @@ void BstSimpleList::set_uplimit(uint32_t limit)
     uplimit = limit;
 }
 
+//lint -esym(429, pdata)
+/*pdata is handled and freed by anothor thread.
+If fail to insert it into list, the caller will get code of -1 and free the memory*/
 int BstSimpleList::list_add_rear(void *pdata)
 {
     struct list_node *nod;
@@ -150,9 +164,15 @@ int BstSimpleList::list_add_rear(void *pdata)
     }
     else
     {
-        tail->next = nod;
-        tail = nod;
+        if(NULL != tail){
+            tail->next = nod;
+            tail = nod;
+        }else{
+            free(nod);
+            return -1;
+        }
     }
+
     list_len++;
 
     return ret;
@@ -160,7 +180,7 @@ int BstSimpleList::list_add_rear(void *pdata)
 
 void BstSimpleList::list_get_headdata(void **ppdata)
 {
-    struct list_node *cur;
+    struct list_node *cur = NULL;
 
     if (0 == list_len)
     {
@@ -168,12 +188,16 @@ void BstSimpleList::list_get_headdata(void **ppdata)
         return;
     }
 
-    *ppdata = head->p_data;
-    cur = head;
-    head = head->next;
+    if(NULL != head){
+        *ppdata = head->p_data;
+        cur = head;
+        head = head->next;
+    }
     list_len--;
 
-    free(cur);
+    if(cur){
+        free(cur);
+    }
 
     return;
 }
@@ -200,8 +224,10 @@ int BstSimpleList::list_mount_rear(BstSimpleList *list_for_mnt)
     }
     else
     {
-        tail->next = list_for_mnt->head;
-        tail = list_for_mnt->tail;
+	    if(NULL != tail){
+            tail->next = list_for_mnt->head;
+            tail = list_for_mnt->tail;
+        }
     }
     list_len += list_for_mnt->list_len;
 
@@ -219,18 +245,5 @@ int BstSimpleList::list_mount_rear(BstSimpleList *list_for_mnt)
     }
 
     return ret;
-}
-
-int BstSimpleList::list_clean()
-{
-    void *pdata = NULL;
-
-    while (list_len)
-    {
-        list_get_headdata(&pdata);
-        free(pdata);
-    }
-
-    return 0;
 }
 

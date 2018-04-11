@@ -109,14 +109,14 @@ void BstSensor::sensord_read_rawdata()
     int ret;
     HW_DATA_UNION *p_hwdata;
 
-    pthread_mutex_lock(&(shmem_hwcntl.mutex));
+    (void)pthread_mutex_lock(&(shmem_hwcntl.mutex));
 
-    if(0 == shmem_hwcntl.p_list->list_len)
+    if(0 == shmem_hwcntl.list.list_len)
     {
         ret = pthread_cond_wait(&(shmem_hwcntl.cond), &(shmem_hwcntl.mutex));
         if (ret)
         {
-            pthread_mutex_unlock(&(shmem_hwcntl.mutex));
+            (void)pthread_mutex_unlock(&(shmem_hwcntl.mutex));
             return;
         }
     }
@@ -130,15 +130,15 @@ void BstSensor::sensord_read_rawdata()
      2. ETIMEDOUT == ret, but meanwhile hwcntl have sent the signal
      */
 
-    while (shmem_hwcntl.p_list->list_len)
+    while (shmem_hwcntl.list.list_len)
     {
-        shmem_hwcntl.p_list->list_get_headdata((void **) &p_hwdata);
+        shmem_hwcntl.list.list_get_headdata((void **) &p_hwdata);
 
         switch (p_hwdata->id)
         {
 
             case SENSOR_TYPE_ACCELEROMETER:
-                ret = tmplist_sensord_acclraw->list_add_rear((void *) p_hwdata);
+                ret = tmplist_sensord_acclraw.list_add_rear((void *) p_hwdata);
                 if (ret)
                 {
                     PERR("list_add_rear() fail, ret = %d", ret);
@@ -148,7 +148,7 @@ void BstSensor::sensord_read_rawdata()
                 }
                 break;
             case SENSOR_TYPE_GYROSCOPE_UNCALIBRATED:
-                ret = tmplist_sensord_gyroraw->list_add_rear((void *) p_hwdata);
+                ret = tmplist_sensord_gyroraw.list_add_rear((void *) p_hwdata);
                 if (ret)
                 {
                     PERR("list_add_rear() fail, ret = %d", ret);
@@ -158,7 +158,7 @@ void BstSensor::sensord_read_rawdata()
                 }
                 break;
             case SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED:
-                ret = tmplist_sensord_magnraw->list_add_rear((void *) p_hwdata);
+                ret = tmplist_sensord_magnraw.list_add_rear((void *) p_hwdata);
                 if (ret)
                 {
                     PERR("list_add_rear() fail, ret = %d", ret);
@@ -167,10 +167,12 @@ void BstSensor::sensord_read_rawdata()
                     }
                 }
                 break;
+            default:
+                break;
         }
     }
 
-    pthread_mutex_unlock(&(shmem_hwcntl.mutex));
+    (void)pthread_mutex_unlock(&(shmem_hwcntl.mutex));
 
     return;
 }
@@ -243,7 +245,7 @@ void *sensord_main(void *arg)
     return NULL;
 }
 
-void sensord_sighandler(int signo, siginfo_t *sig_info, void *ctx)
+void sensord_sighandler(int signo, struct siginfo *sig_info, void *ctx)
 {
     (void) sig_info;
     (void) ctx;

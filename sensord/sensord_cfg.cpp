@@ -99,15 +99,15 @@
 #include "sensord_hwcntl.h"
 #include "util_misc.h"
 
-int g_place_a = 0;
+int g_place_a = 3;
 int g_place_m = 0;
-int g_place_g = 0;
-int solution_type = SOLUTION_MDOF;
+int g_place_g = 3;
+int solution_type = SOLUTION_IMU;
 int accl_chip = ACC_CHIP_BMI160;
 int gyro_chip = GYR_CHIP_BMI160;
-int magn_chip = MAG_CHIP_BMI160;
-int accl_range = ACC_CHIP_RANGCONF_2G;
-int algo_pass = 0;
+int magn_chip = MAG_CHIP_BMM150;
+int accl_range = ACC_CHIP_RANGCONF_8G;
+int algo_pass = 1;
 int amsh_intr_pin = 0;
 int amsh_calibration = 0;
 int data_log = 0;
