@@ -3,6 +3,8 @@
  *
  * (C) Copyright 2011~2015 Bosch Sensortec GmbH All Rights Reserved
  *
+ * (C) Modification Copyright 2018 Robert Bosch Kft  All Rights Reserved
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,38 +18,69 @@
  * limitations under the License.
  *
  *------------------------------------------------------------------------------
- *  Disclaimer
+ * Disclaimer
  *
- * Common: Bosch Sensortec products are developed for the consumer goods
- * industry. They may only be used within the parameters of the respective valid
- * product data sheet.  Bosch Sensortec products are provided with the express
- * understanding that there is no warranty of fitness for a particular purpose.
- * They are not fit for use in life-sustaining, safety or security sensitive
- * systems or any system or device that may lead to bodily harm or property
- * damage if the system or device malfunctions. In addition, Bosch Sensortec
- * products are not fit for use in products which interact with motor vehicle
- * systems.  The resale and/or use of products are at the purchaser's own risk
- * and his own responsibility. The examination of fitness for the intended use
- * is the sole responsibility of the Purchaser.
+ * Common:
  *
- * The purchaser shall indemnify Bosch Sensortec from all third party claims,
- * including any claims for incidental, or consequential damages, arising from
- * any product use not covered by the parameters of the respective valid product
- * data sheet or not approved by Bosch Sensortec and reimburse Bosch Sensortec
- * for all costs in connection with such claims.
+ * Assessment of Products Returned from Field
+ *
+ * Returned products are considered good if they fulfill the specifications / 
+ * test data for 0-mileage and field listed in this document.
+ *
+ * Engineering Samples
+ * 
+ * Engineering samples are marked with (e) or (E). Samples may vary from the
+ * valid technical specifications of the series product contained in this
+ * data sheet. Therefore, they are not intended or fit for resale to
+ * third parties or for use in end products. Their sole purpose is internal
+ * client testing. The testing of an engineering sample may in no way replace
+ * the testing of a series product. Bosch assumes no liability for the use
+ * of engineering samples. The purchaser shall indemnify Bosch from all claims
+ * arising from the use of engineering samples.
+ *
+ * Intended use
+ *
+ * Provided that SMI130 is used within the conditions (environment, application,
+ * installation, loads) as described in this TCD and the corresponding
+ * agreed upon documents, Bosch ensures that the product complies with
+ * the agreed properties. Agreements beyond this require
+ * the written approval by Bosch. The product is considered fit for the intended
+ * use when the product successfully has passed the tests
+ * in accordance with the TCD and agreed upon documents.
+ *
+ * It is the responsibility of the customer to ensure the proper application
+ * of the product in the overall system/vehicle.
+ *
+ * Bosch does not assume any responsibility for changes to the environment
+ * of the product that deviate from the TCD and the agreed upon documents 
+ * as well as all applications not released by Bosch
+  *
+ * The resale and/or use of products are at the purchaser’s own risk and 
+ * responsibility. The examination and testing of the SMI130 
+ * is the sole responsibility of the purchaser.
+ *
+ * The purchaser shall indemnify Bosch from all third party claims 
+ * arising from any product use not covered by the parameters of 
+ * this product data sheet or not approved by Bosch and reimburse Bosch 
+ * for all costs and damages in connection with such claims.
  *
  * The purchaser must monitor the market for the purchased products,
- * particularly with regard to product safety and inform Bosch Sensortec without
- * delay of all security relevant incidents.
+ * particularly with regard to product safety, and inform Bosch without delay
+ * of all security relevant incidents.
  *
- * Engineering Samples are marked with an asterisk (*) or (e). Samples may vary
- * from the valid technical specifications of the product series. They are
- * therefore not intended or fit for resale to third parties or for use in end
- * products. Their sole purpose is internal client testing. The testing of an
- * engineering sample may in no way replace the testing of a product series.
- * Bosch Sensortec assumes no liability for the use of engineering samples. By
- * accepting the engineering samples, the Purchaser agrees to indemnify Bosch
- * Sensortec from all claims arising from the use of engineering samples.
+ * Application Examples and Hints
+ *
+ * With respect to any application examples, advice, normal values
+ * and/or any information regarding the application of the device,
+ * Bosch hereby disclaims any and all warranties and liabilities of any kind,
+ * including without limitation warranties of
+ * non-infringement of intellectual property rights or copyrights
+ * of any third party.
+ * The information given in this document shall in no event be regarded 
+ * as a guarantee of conditions or characteristics. They are provided
+ * for illustrative purposes only and no evaluation regarding infringement
+ * of intellectual property rights or copyrights or regarding functionality,
+ * performance or error has been made.
  *
  * Special: This software module (hereinafter called "Software") and any
  * information on application-sheets (hereinafter called "Information") is
@@ -78,6 +111,8 @@
  * @date         "Fri Feb 5 15:40:38 2016 +0800"
  * @commit       "666efb6"
  *
+ * @modification date         "Thu May 3 12:23:56 2018 +0100"
+ *
  * @brief
  *
  * @detail
@@ -104,7 +139,7 @@
 #include <utils/Timers.h>
 #endif
 
-#include "BstSensor.h"
+#include "BoschSensor.h"
 
 #include "axis_remap.h"
 #include "sensord_hwcntl.h"
@@ -284,19 +319,19 @@ uint32_t ap_get_sensorlist(struct sensor_t const** p_sSensorList)
     int32_t i;
     int32_t j;
 
-    if (0 == bst_sensorlist.list_len)
+    if (0 == bosch_sensorlist.list_len)
     {
         switch(accl_range){
             case ACC_CHIP_RANGCONF_2G:
             case ACC_CHIP_RANGCONF_4G:
             case ACC_CHIP_RANGCONF_8G:
             case ACC_CHIP_RANGCONF_16G:
-                bst_all_sensors[SENSORLIST_INX_ACCELEROMETER].maxRange = accl_range * GRAVITY_EARTH;
-                bst_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].maxRange = accl_range * GRAVITY_EARTH;
-                bst_all_sensors[SENSORLIST_INX_GRAVITY].maxRange = accl_range * GRAVITY_EARTH;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_ACCELEROMETER].maxRange = accl_range * GRAVITY_EARTH;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_LINEAR_ACCELERATION].maxRange = accl_range * GRAVITY_EARTH;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_GRAVITY].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_ACCELEROMETER].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_GRAVITY].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_ACCELEROMETER].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_LINEAR_ACCELERATION].maxRange = accl_range * GRAVITY_EARTH;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_GRAVITY].maxRange = accl_range * GRAVITY_EARTH;
                 break;
             default:
                 PWARN("Invalid accl_range: %d", accl_range);
@@ -305,129 +340,129 @@ uint32_t ap_get_sensorlist(struct sensor_t const** p_sSensorList)
 
         if(MAG_CHIP_AKM09912 ==  magn_chip || MAG_CHIP_AKM09911 ==  magn_chip)
         {
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].name = "AKM Magnetic Field Sensor";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].vendor = "AKM";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 4900.0f;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].name = "AKM Magnetic Field Sensor";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].vendor = "AKM";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 4900.0f;
             if(MAG_CHIP_AKM09912 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 1.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 1.0f;
             }else if(MAG_CHIP_AKM09911 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.6f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 2.4f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.6f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 2.4f;
             }
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].name = "AKM Magnetic Field Uncalibrated Sensor";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].vendor = "AKM";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 4900.0f;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].name = "AKM Magnetic Field Uncalibrated Sensor";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].vendor = "AKM";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 4900.0f;
             if(MAG_CHIP_AKM09912 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 1.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 1.0f;
             }else if(MAG_CHIP_AKM09911 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.6f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 2.4f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.6f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 2.4f;
             }
 
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].name = "AKM Magnetic Field (Wakeup) Sensor";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].vendor = "AKM";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 4900.0f;
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].name = "AKM Magnetic Field (Wakeup) Sensor";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].vendor = "AKM";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 4900.0f;
             if(MAG_CHIP_AKM09912 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 1.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 1.0f;
             }else if(MAG_CHIP_AKM09911 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.6f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 2.4f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.6f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 2.4f;
             }
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].name = "AKM Magnetic Field Uncalibrated (Wakeup) Sensor";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].vendor = "AKM";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 4900.0f;
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].name = "AKM Magnetic Field Uncalibrated (Wakeup) Sensor";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].vendor = "AKM";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 4900.0f;
             if(MAG_CHIP_AKM09912 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 1.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 1.0f;
             }else if(MAG_CHIP_AKM09911 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.6f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 2.4f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.6f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 2.4f;
             }
         }
 
         if(MAG_CHIP_YAS537 == magn_chip || MAG_CHIP_YAS532 == magn_chip)
         {
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].name = "YAS Magnetic Field Sensor";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].vendor = "YAS";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].name = "YAS Magnetic Field Sensor";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].vendor = "YAS";
             if(MAG_CHIP_YAS537 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 2000.0f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.3f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 1.8f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 2000.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.3f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 1.8f;
             }else if(MAG_CHIP_YAS532 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 1200.0f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 2.6f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].maxRange = 1200.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].power = 2.6f;
             }
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].name = "YAS Magnetic Field Uncalibrated Sensor";
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].vendor = "YAS";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].name = "YAS Magnetic Field Uncalibrated Sensor";
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].vendor = "YAS";
             if(MAG_CHIP_YAS537 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 2000.0f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.3f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 1.8f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 2000.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.3f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 1.8f;
             }else if(MAG_CHIP_YAS532 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 1200.0f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 2.6f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 1200.0f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].power = 2.6f;
             }
 
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].name = "YAS Magnetic Field (Wakeup) Sensor";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].vendor = "YAS";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].name = "YAS Magnetic Field (Wakeup) Sensor";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].vendor = "YAS";
             if(MAG_CHIP_YAS537 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 2000.0f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.3f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 1.8f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 2000.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.3f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 1.8f;
             }else if(MAG_CHIP_YAS532 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 1200.0f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 2.6f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].maxRange = 1200.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD].power = 2.6f;
             }
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].name = "YAS Magnetic Field Uncalibrated (Wakeup) Sensor";
-            bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].vendor = "YAS";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].name = "YAS Magnetic Field Uncalibrated (Wakeup) Sensor";
+            bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].vendor = "YAS";
             if(MAG_CHIP_YAS537 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 2000.0f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.3f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 1.8f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 2000.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.3f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 1.8f;
             }else if(MAG_CHIP_YAS532 ==  magn_chip){
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 1200.0f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
-                bst_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 2.6f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].maxRange = 1200.0f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].resolution = 0.15f;
+                bosch_all_sensors[SENSORLIST_INX_WAKEUP_MAGNETIC_FIELD_UNCALIBRATED].power = 2.6f;
             }
         }
 
         if(SOLUTION_MDOF == solution_type)
         {
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].minDelay = 20000;
         }
         /*So far compass / m4g subset library support max 25/50Hz on virtual sensors*/
         else if(SOLUTION_ECOMPASS == solution_type)
         {
-            bst_all_sensors[SENSORLIST_INX_ORIENTATION].minDelay = 40000;
-            bst_all_sensors[SENSORLIST_INX_GRAVITY].minDelay = 40000;
-            bst_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].minDelay = 40000;
-            bst_all_sensors[SENSORLIST_INX_ROTATION_VECTOR].minDelay = 40000;
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_ROTATION_VECTOR].minDelay = 40000;
+            bosch_all_sensors[SENSORLIST_INX_ORIENTATION].minDelay = 40000;
+            bosch_all_sensors[SENSORLIST_INX_GRAVITY].minDelay = 40000;
+            bosch_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].minDelay = 40000;
+            bosch_all_sensors[SENSORLIST_INX_ROTATION_VECTOR].minDelay = 40000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_ROTATION_VECTOR].minDelay = 40000;
         }else if(SOLUTION_M4G == solution_type){
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_ORIENTATION].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_GYROSCOPE].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_GRAVITY].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_ROTATION_VECTOR].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_GYROSCOPE_UNCALIBRATED].minDelay = 20000;
-            bst_all_sensors[SENSORLIST_INX_MAGNETIC_ROTATION_VECTOR].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_ORIENTATION].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_GYROSCOPE].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_GRAVITY].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_LINEAR_ACCELERATION].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_ROTATION_VECTOR].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_FIELD_UNCALIBRATED].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_GYROSCOPE_UNCALIBRATED].minDelay = 20000;
+            bosch_all_sensors[SENSORLIST_INX_MAGNETIC_ROTATION_VECTOR].minDelay = 20000;
         }
 
         avail_sens_regval = ( (1 << SENSORLIST_INX_ACCELEROMETER) | (1 << SENSORLIST_INX_GYROSCOPE_UNCALIBRATED) );
 
         sensor_amount = sensord_popcount_64(avail_sens_regval);
 
-        bst_sensorlist.list = (struct sensor_t *) malloc(sensor_amount * sizeof(struct sensor_t));
-        if (NULL == bst_sensorlist.list)
+        bosch_sensorlist.list = (struct sensor_t *) malloc(sensor_amount * sizeof(struct sensor_t));
+        if (NULL == bosch_sensorlist.list)
         {
 
             PERR("fail to malloc %d * sizeof(struct sensor_t)(=%d)",
@@ -435,12 +470,12 @@ uint32_t ap_get_sensorlist(struct sensor_t const** p_sSensorList)
             return 0;
         }
 
-        bst_sensorlist.bsx_list_index = (int32_t *) malloc(sensor_amount * sizeof(int32_t));
-        if (NULL == bst_sensorlist.bsx_list_index)
+        bosch_sensorlist.bsx_list_index = (int32_t *) malloc(sensor_amount * sizeof(int32_t));
+        if (NULL == bosch_sensorlist.bsx_list_index)
         {
 
             PERR("fail to malloc %d * 4", sensor_amount);
-            free(bst_sensorlist.list);
+            free(bosch_sensorlist.list);
             return 0;
         }
 
@@ -453,17 +488,17 @@ uint32_t ap_get_sensorlist(struct sensor_t const** p_sSensorList)
 
             if (avail_sens_regval & 0x1)
             {
-                memcpy(&(bst_sensorlist.list[j]), &(bst_all_sensors[i]), sizeof(struct sensor_t));
-                bst_sensorlist.bsx_list_index[j] = i;
+                memcpy(&(bosch_sensorlist.list[j]), &(bosch_all_sensors[i]), sizeof(struct sensor_t));
+                bosch_sensorlist.bsx_list_index[j] = i;
                 j++;
             }
         }
 
-        bst_sensorlist.list_len = sensor_amount;
+        bosch_sensorlist.list_len = sensor_amount;
     }
 
-    *p_sSensorList = bst_sensorlist.list;
-    return bst_sensorlist.list_len;
+    *p_sSensorList = bosch_sensorlist.list;
+    return bosch_sensorlist.list_len;
 }
 
 static inline int32_t BMI160_convert_ODR(int32_t bsx_list_inx, float Hz)
@@ -1045,7 +1080,7 @@ static void ap_send_config(int32_t bsx_list_inx)
     {
         bsx_config_output[0].sensor_id = bsx_supplier_id;
 
-        p_sensor = &(bst_all_sensors[bsx_list_inx]);
+        p_sensor = &(bosch_all_sensors[bsx_list_inx]);
         if(SENSOR_FLAG_ON_CHANGE_MODE == (p_sensor->flags & REPORTING_MODE_MASK))
         {
             bsx_config_output[0].sample_rate = p_config[bsx_list_inx - list_inx_base].delay_onchange_Hz;
@@ -1244,7 +1279,7 @@ int32_t ap_batch(int32_t handle, int32_t flags, int64_t sampling_period_ns, int6
     return 0;
 }
 
-int32_t ap_flush(BstSensor *bstsensor, int32_t handle)
+int32_t ap_flush(BoschSensor *boschsensor, int32_t handle)
 {
     struct sensor_t *p_sensor;
     int32_t bsx_list_inx;
@@ -1268,7 +1303,7 @@ int32_t ap_flush(BstSensor *bstsensor, int32_t handle)
 
 
     //Now the driver can not support this specification, so has to work around
-    (void) bstsensor->send_flush_event(handle);
+    (void) boschsensor->send_flush_event(handle);
 
     /*If the specified sensor has no FIFO (no buffering possible),
      or if the FIFO was empty at the time of the call,
@@ -1281,7 +1316,7 @@ int32_t ap_flush(BstSensor *bstsensor, int32_t handle)
 }
 
 
-static void ap_hw_process_IIO_frame(int32_t header, char *data, BstSimpleList *dest_list)
+static void ap_hw_process_IIO_frame(int32_t header, char *data, BoschSimpleList *dest_list)
 {
 
     HW_DATA_UNION *p_hwdata;
@@ -1396,7 +1431,7 @@ static void ap_hw_process_IIO_frame(int32_t header, char *data, BstSimpleList *d
     return;
 }
 
-static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
+static void ap_hw_poll_bma2x2(BoschSimpleList *dest_list)
 {
     int32_t i;
     int32_t ret;
@@ -1444,7 +1479,7 @@ static void ap_hw_poll_bma2x2(BstSimpleList *dest_list)
     return;
 }
 
-static void ap_hw_poll_bmg160(BstSimpleList *dest_list)
+static void ap_hw_poll_bmg160(BoschSimpleList *dest_list)
 {
 
     int32_t i;
@@ -1495,7 +1530,7 @@ static void ap_hw_poll_bmg160(BstSimpleList *dest_list)
 
 
 /*
-static void dump_samples(BstSimpleList *al, BstSimpleList *gl, BstSimpleList *ml)
+static void dump_samples(BoschSimpleList *al, BoschSimpleList *gl, BoschSimpleList *ml)
 {
     HW_DATA_UNION *p_hwdata;
     struct list_node *pnode;
@@ -1530,7 +1565,7 @@ static void dump_samples(BstSimpleList *al, BstSimpleList *gl, BstSimpleList *ml
 
 
 
-static uint32_t IMU_hw_deliver_sensordata(BstSensor *bstsensor)
+static uint32_t IMU_hw_deliver_sensordata(BoschSensor *boschsensor)
 {
     int32_t ret;
     uint32_t j;
@@ -1565,33 +1600,33 @@ static uint32_t IMU_hw_deliver_sensordata(BstSensor *bstsensor)
         switch (j)
         {
             case 0:
-                ap_hw_poll_bma2x2(bstsensor->tmplist_hwcntl_acclraw);
+                ap_hw_poll_bma2x2(boschsensor->tmplist_hwcntl_acclraw);
                 break;
 
             case 1:
-                ap_hw_poll_bmg160(bstsensor->tmplist_hwcntl_gyroraw);
+                ap_hw_poll_bmg160(boschsensor->tmplist_hwcntl_gyroraw);
                 break;
         }
 
     }
 
 #if 1
-    if (bstsensor->tmplist_hwcntl_acclraw->list_len + bstsensor->tmplist_hwcntl_gyroraw->list_len)
+    if (boschsensor->tmplist_hwcntl_acclraw->list_len + boschsensor->tmplist_hwcntl_gyroraw->list_len)
     {
-        pthread_mutex_lock(&(bstsensor->shmem_hwcntl.mutex));
+        pthread_mutex_lock(&(boschsensor->shmem_hwcntl.mutex));
 
-        ret = bstsensor->shmem_hwcntl.p_list->list_mount_rear(bstsensor->tmplist_hwcntl_acclraw);
+        ret = boschsensor->shmem_hwcntl.p_list->list_mount_rear(boschsensor->tmplist_hwcntl_acclraw);
         if(ret){
             PWARN("list mount fail");
         }
 
-        ret = bstsensor->shmem_hwcntl.p_list->list_mount_rear(bstsensor->tmplist_hwcntl_gyroraw);
+        ret = boschsensor->shmem_hwcntl.p_list->list_mount_rear(boschsensor->tmplist_hwcntl_gyroraw);
         if(ret){
             PWARN("list mount fail");
         }
 
-        pthread_cond_signal(&(bstsensor->shmem_hwcntl.cond));
-        pthread_mutex_unlock(&(bstsensor->shmem_hwcntl.mutex));
+        pthread_cond_signal(&(boschsensor->shmem_hwcntl.cond));
+        pthread_mutex_unlock(&(boschsensor->shmem_hwcntl.mutex));
     }
 #endif
     return 0;
@@ -2049,20 +2084,20 @@ static int32_t ap_hwcntl_init_MAGN()
 }
 
 
-int32_t hwcntl_init(BstSensor *bstsensor)
+int32_t hwcntl_init(BoschSensor *boschsensor)
 {
     int32_t ret = 0;
     struct itimerspec timerspec;
 
     ap_show_ver();
 
-    bstsensor->pfun_get_sensorlist = ap_get_sensorlist;
-    bstsensor->pfun_activate = ap_activate;
-    bstsensor->pfun_batch = ap_batch;
-    bstsensor->pfun_flush = ap_flush;
+    boschsensor->pfun_get_sensorlist = ap_get_sensorlist;
+    boschsensor->pfun_activate = ap_activate;
+    boschsensor->pfun_batch = ap_batch;
+    boschsensor->pfun_flush = ap_flush;
     if(SOLUTION_IMU == solution_type)
     {
-        bstsensor->pfun_hw_deliver_sensordata = IMU_hw_deliver_sensordata;
+        boschsensor->pfun_hw_deliver_sensordata = IMU_hw_deliver_sensordata;
         ret = ap_hwcntl_init_ACC();
         ret = ap_hwcntl_init_GYRO();
     }else

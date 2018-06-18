@@ -4,7 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../sensord/bstsimple_list.cpp \
+../sensord/boschsimple_list.cpp \
 ../sensord/sensord.cpp \
 ../sensord/sensord_algo.cpp \
 ../sensord/sensord_cfg.cpp \
@@ -18,7 +18,7 @@ C_SRCS += \
 
 OBJS += \
 ./sensord/axis_remap.o \
-./sensord/bstsimple_list.o \
+./sensord/boschsimple_list.o \
 ./sensord/sensord.o \
 ./sensord/sensord_algo.o \
 ./sensord/sensord_cfg.o \
@@ -33,7 +33,7 @@ C_DEPS += \
 ./sensord/util_misc.d 
 
 CPP_DEPS += \
-./sensord/bstsimple_list.d \
+./sensord/boschsimple_list.d \
 ./sensord/sensord.d \
 ./sensord/sensord_algo.d \
 ./sensord/sensord_cfg.d \

@@ -40,9 +40,9 @@ LOCAL_SRC_FILES :=\
 	sensord/sensord_cfg.cpp\
 	sensord/sensord_algo.cpp\
 	sensord/sensord.cpp\
-	sensord/bstsimple_list.cpp\
+	sensord/boschsimple_list.cpp\
 	hal/sensors.cpp\
-	hal/BstSensor.cpp\
+	hal/BoschSensor.cpp\
 
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/hal\

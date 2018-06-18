@@ -107,9 +107,9 @@
  * Information nor for any infringement of patents or other rights of third
  * parties which may result from its use.
  *
- * @file         sensord_algo.h
- * @date         "Fri Dec 11 10:40:18 2015 +0800"
- * @commit       "4498a7f"
+ * @file         boschsimple_list.cpp
+ * @date         "Tue Sep 15 02:36:56 2015 -0400"
+ * @commit       "1758191"
  *
  * @modification date         "Thu May 3 12:23:56 2018 +0100"
  *
@@ -119,48 +119,153 @@
  *
  */
 
-#ifndef __SENSORD_ALGO_H
-#define __SENSORD_ALGO_H
+#include "boschsimple_list.h"
+#include "sensord_pltf.h"
 
-#ifdef __cplusplus
-extern "C"
+#define DEFAULT_LIST_LEN 128
+
+BoschSimpleList::BoschSimpleList()
 {
-#endif
+    head = NULL;
+    tail = NULL;
+    list_len = 0;
+    set_uplimit(DEFAULT_LIST_LEN);
 
-#include "bsx_activity_bit_identifier.h"
-#include "bsx_android.h"
-#include "bsx_constant.h"
-#include "bsx_datatypes.h"
-#include "bsx_library.h"
-#include "bsx_module_identifier.h"
-#include "bsx_physical_sensor_identifier.h"
-#include "bsx_property_set_identifier.h"
-#include "bsx_return_value_identifier.h"
-#include "bsx_user_def.h"
-#include "bsx_vector_index_identifier.h"
-#include "bsx_virtual_sensor_identifier.h"
-
-#ifdef __cplusplus
+    return;
 }
-#endif
 
-#define SAMPLE_RATE_DISABLED 65535.f
-#define BST_DLOG_ID_START 256
-#define BST_DLOG_ID_SUBSCRIBE_OUT BST_DLOG_ID_START
-#define BST_DLOG_ID_SUBSCRIBE_IN (BST_DLOG_ID_START+1)
-#define BST_DLOG_ID_DOSTEP (BST_DLOG_ID_START+2)
-#define BST_DLOG_ID_ABANDON (BST_DLOG_ID_START+3)
-#define BST_DLOG_ID_NEWSAMPLE (BST_DLOG_ID_START+4)
+BoschSimpleList::~BoschSimpleList()
+{
+    list_clean();
+    return;
+}
 
-extern int sensord_bsx_init(void);
+void BoschSimpleList::set_uplimit(uint32_t limit)
+{
+    if (0 == limit)
+    {
+        //at least 1 node can be stored
+        // to log something...
+        limit = 1;
+    }
+    uplimit = limit;
+}
 
-extern void sensord_algo_process(BoschSensor *boschsensor);
-extern bsx_return_t sensord_update_subscription(
-                            bsx_sensor_configuration_t *const virtual_sensor_config_p,
-                            bsx_u32_t *const n_virtual_sensor_config_p,
-                            bsx_sensor_configuration_t *const physical_sensor_config_p,
-                            bsx_u32_t *const n_physical_sensor_config_p,
-                            uint32_t cur_active_cnt);
-extern uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3], int64_t *pre_tm, uint32_t counter);
+int BoschSimpleList::list_add_rear(void *pdata)
+{
+    struct list_node *nod;
+    void *del;
+    int ret = 0;
 
-#endif
+    nod = (struct list_node *) malloc(sizeof(struct list_node));
+    if (NULL == nod)
+    {
+        return -1;
+    }
+
+    if (list_len == uplimit)
+    {
+        ret = -2;
+        PERR("list buffer is full, drop the oldest data");
+        list_get_headdata(&del);
+        free(del);
+    }
+
+    nod->p_data = pdata;
+    nod->next = NULL;
+    if (NULL == head)
+    {
+        /*to be convenient, when running,
+         tail point is allowed to have obsolete value.
+         so use head point to judge if empty
+         */
+        //first node added
+        tail = nod;
+        head = nod;
+    }
+    else
+    {
+        tail->next = nod;
+        tail = nod;
+    }
+    list_len++;
+
+    return ret;
+}
+
+void BoschSimpleList::list_get_headdata(void **ppdata)
+{
+    struct list_node *cur;
+
+    if (0 == list_len)
+    {
+        *ppdata = NULL;
+        return;
+    }
+
+    *ppdata = head->p_data;
+    cur = head;
+    head = head->next;
+    list_len--;
+
+    free(cur);
+
+    return;
+}
+
+int BoschSimpleList::list_mount_rear(BoschSimpleList *list_for_mnt)
+{
+    void *pdata = NULL;
+    int ret = 0;
+
+    if (NULL == list_for_mnt || 0 == list_for_mnt->list_len)
+    {
+        return 0;
+    }
+
+    if (NULL == head)
+    {
+        /*to be convenient, when running,
+         tail point is allowed to have obsolete value.
+         so use head point to judge if empty
+         */
+        //the destined list is yet empty
+        head = list_for_mnt->head;
+        tail = list_for_mnt->tail;
+    }
+    else
+    {
+        tail->next = list_for_mnt->head;
+        tail = list_for_mnt->tail;
+    }
+    list_len += list_for_mnt->list_len;
+
+    list_for_mnt->head = NULL;
+    list_for_mnt->tail = NULL;
+    list_for_mnt->list_len = 0;
+
+    //truncate to uplimit
+    while (list_len > uplimit)
+    {
+        ret = -1;
+        PERR("add too much, drop the oldest data");
+        list_get_headdata(&pdata);
+        free(pdata);
+    }
+
+    return ret;
+}
+
+int BoschSimpleList::list_clean()
+{
+    void *pdata = NULL;
+
+    while (list_len)
+    {
+        list_get_headdata(&pdata);
+        free(pdata);
+    }
+
+    return 0;
+}
+

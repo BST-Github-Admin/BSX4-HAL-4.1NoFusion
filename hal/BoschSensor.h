@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  *------------------------------------------------------------------------------
-*  Disclaimer
+ * Disclaimer
  *
  * Common:
  *
@@ -107,9 +107,9 @@
  * Information nor for any infringement of patents or other rights of third
  * parties which may result from its use.
  *
- * @file         sensord_pltf.c
- * @date         "Thu Feb 4 13:36:50 2016 +0800"
- * @commit       "7020e4d"
+ * @file         BoschSensor.h
+ * @date         "Fri Feb 5 15:40:38 2016 +0800"
+ * @commit       "666efb6"
  *
  * @modification date         "Thu May 3 12:23:56 2018 +0100"
  *
@@ -118,232 +118,77 @@
  * @detail
  *
  */
+
+#ifndef ANDROID_BST_SENSOR_H
+#define ANDROID_BST_SENSOR_H
+
 #include <stdio.h>
-#include <unistd.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <time.h>
-#include <errno.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#include "sensord_def.h"
-#include "sensord_cfg.h"
-#include "sensord_pltf.h"
-
-#define SENSORD_TRACE_FILE (PATH_DIR_SENSOR_STORAGE "/sensord.log")
-#define DATA_IN_FILE (PATH_DIR_SENSOR_STORAGE "/data_in.log")
-#define BSX_DATA_LOG (PATH_DIR_SENSOR_STORAGE "/bsx_datalog.log")
-
-static FILE *g_fp_trace = NULL;
-static FILE *g_dlog_input = NULL;
-static FILE *g_bsx_dlog = NULL;
-
-static inline void storage_init()
-{
-    char *path = NULL;
-    int ret = 0;
-    struct stat st;
-
-    path = (char *) (PATH_DIR_SENSOR_STORAGE);
-
-    ret = stat(path, &st);
-    if (0 == ret)
-    {
-        if (S_IFDIR == (st.st_mode & S_IFMT))
-        {
-            /*already exist*/
-            ret = chmod(path, 0766);
-            if (ret)
-            {
-                printf("error chmod on %s", path);
-            }
-        }
-
-        return;
-    }
-
-    ret = mkdir(path, 0766);
-    if (ret)
-    {
-        printf("error creating storage dir\n");
-    }
-    chmod(path, 0766); //notice the "umask" could mask some privilege when mkdir
-
-    return;
-}
-
-void sensord_trace_init()
-{
-    g_fp_trace = fopen(SENSORD_TRACE_FILE, "w");
-    if(NULL == g_fp_trace)
-    {
-        printf("sensord_trace_init: fail to open log file %s! \n", SENSORD_TRACE_FILE);
-        g_fp_trace = stdout;
-        return;
-    }
-
-    chmod(SENSORD_TRACE_FILE, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
-
-    return;
-}
-
-int64_t sensord_get_tmstmp_ns(void)
-{
-
-    int64_t ap_time;
-    struct timespec ts;
-
-    clock_gettime(CLOCK_BOOTTIME, &ts);
-    ap_time = (int64_t) ts.tv_sec * 1000000000 + ts.tv_nsec;
-
-    return ap_time;
-
-}
-
-void trace_log(uint32_t level, const char *fmt, ...)
-{
-    int ret = 0;
-    va_list ap;
+#include <sys/cdefs.h>
+#include <signal.h>
+#include <pthread.h>
 #if !defined(PLTF_LINUX_ENABLED)
-    char buffer[256] = { 0 };
-#endif
-
-    if (0 == trace_to_logcat)
-    {
-        if (0 == (trace_level & level))
-        {
-            return;
-        }
-
-        va_start(ap, fmt);
-        ret = vfprintf(g_fp_trace, fmt, ap);
-        va_end(ap);
-
-        // otherwise, data is buffered rather than be wrote to file
-        // therefore when stopped by signal, NO data left in file!
-        fflush(g_fp_trace);
-
-        if (ret < 0)
-        {
-            printf("trace_log: fprintf(g_fp_trace, fmt, ap)  fail!!\n");
-        }
-    }
-    else
-    {
-
-#if !defined(PLTF_LINUX_ENABLED)
-        /**
-         * here use android api
-         * Let it use Android trace level.
-         */
-#include<android/log.h>
-#define BST_LOG_TAG    "sensord"
-
-        va_start(ap, fmt);
-        vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
-        va_end(ap);
-
-        switch (level)
-        {
-            case LOG_LEVEL_N:
-                __android_log_print(ANDROID_LOG_FATAL, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_E:
-                __android_log_print(ANDROID_LOG_ERROR, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_W:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_I:
-                __android_log_print(ANDROID_LOG_INFO, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_D:
-                __android_log_print(ANDROID_LOG_DEBUG, BST_LOG_TAG, "%s", buffer);
-                break;
-            case LOG_LEVEL_LADON:
-                __android_log_print(ANDROID_LOG_WARN, BST_LOG_TAG, "%s", buffer);
-                break;
-            default:
-                break;
-        }
-
+#include <hardware/sensors.h>
 #else
-
-        if(0 == (trace_level & level))
-        {
-            return;
-        }
-
-        va_start(ap, fmt);
-        vprintf(fmt, ap);
-        va_end(ap);
-
+#include "sensors.h"
 #endif
-    }
+#include "sensord_def.h"
+#include "boschsimple_list.h"
 
-    return;
-}
-
-static void generic_data_log(const char*dest_path, FILE **p_dest_fp, char *info_str)
+typedef struct
 {
-    if (NULL == (*p_dest_fp))
-    {
-        (*p_dest_fp) = fopen(dest_path, "w");
-        if (NULL == (*p_dest_fp))
-        {
-            printf("fail to open file %s! \n", dest_path);
-            return;
-        }
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    BoschSimpleList *p_list;
+} SENSORD_SHARED_MEM;
 
-        chmod(dest_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-    }
-
-    fprintf((*p_dest_fp), "%s", info_str);
-
-    // otherwise, data is buffered rather than be wrote to file
-    // therefore when stopped by signal, NO data left in file!
-    fflush((*p_dest_fp));
-
-}
-
-void data_log_algo_input(char *info_str)
+class BoschSensor
 {
-    generic_data_log(DATA_IN_FILE, &g_dlog_input, info_str);
-}
+public:
+    static BoschSensor *getInstance();
+    static void destroy();
 
-void bsx_datalog_algo(char *info_str)
-{
-    generic_data_log(BSX_DATA_LOG, &g_bsx_dlog, info_str);
-}
+    int activate(int handle, int enabled);
+    int setDelay(int handle, int64_t ns);
+    int read_events(sensors_event_t* data, int count);
+    int batch(int handle, int flags, int64_t sampling_period_ns, int64_t max_report_latency_ns);
+    int flush(int handle);
+#if defined(SENSORS_DEVICE_API_VERSION_1_4)
+    int inject_sensor_data(const sensors_event_t *data);
+#endif
+    uint32_t get_sensorlist(struct sensor_t const** p_sSensorList);
+    void sensord_read_rawdata();
+    void sensord_deliver_event(sensors_event_t *p_event);
 
+    int send_flush_event(int32_t sensor_id);
 
-void sensord_pltf_init(void)
-{
-    storage_init();
+    int (*pfun_activate)(int handle, int enabled);
+    int (*pfun_batch)(int handle, int flags, int64_t sampling_period_ns, int64_t max_report_latency_ns);
+    int (*pfun_flush)(BoschSensor *boschsensor, int handle);
+    uint32_t (*pfun_get_sensorlist)(struct sensor_t const** p_sSensorList);
+    uint32_t (*pfun_hw_deliver_sensordata)(BoschSensor *boschsensor);
 
-    sensord_trace_init();
+    BoschSimpleList *tmplist_hwcntl_acclraw;
+    BoschSimpleList *tmplist_hwcntl_gyroraw;
+    BoschSimpleList *tmplist_hwcntl_magnraw;
 
-    return;
-}
+    BoschSimpleList *tmplist_sensord_acclraw;
+    BoschSimpleList *tmplist_sensord_gyroraw;
+    BoschSimpleList *tmplist_sensord_magnraw;
 
-void sensord_pltf_clearup(void)
-{
-    fclose(g_fp_trace);
+    SENSORD_SHARED_MEM shmem_hwcntl;
+    int HALpipe_fd[2];
 
-    if (g_dlog_input)
-    {
-        fclose(g_dlog_input);
-    }
-    if(g_bsx_dlog)
-    {
-        fclose(g_bsx_dlog);
-    }
-    return;
-}
+private:
+    BoschSensor();
+    BoschSensor(const BoschSensor & other); //for cppcheck "noCopyConstructor"
+    ~BoschSensor();
 
+    static BoschSensor *instance;
+    void sensord_cfg_init();
+
+    pthread_t thread_sensord;
+    pthread_t thread_hwcntl;
+};
+
+#endif  // ANDROID_BST_SENSOR_H

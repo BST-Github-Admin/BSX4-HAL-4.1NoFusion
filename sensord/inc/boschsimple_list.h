@@ -107,9 +107,9 @@
  * Information nor for any infringement of patents or other rights of third
  * parties which may result from its use.
  *
- * @file         sensord_algo.h
- * @date         "Fri Dec 11 10:40:18 2015 +0800"
- * @commit       "4498a7f"
+ * @file         boschsimple_list.h
+ * @date         "Tue May 26 04:13:54 2015 -0400"
+ * @commit       "6441941"
  *
  * @modification date         "Thu May 3 12:23:56 2018 +0100"
  *
@@ -119,48 +119,46 @@
  *
  */
 
-#ifndef __SENSORD_ALGO_H
-#define __SENSORD_ALGO_H
+#ifndef BST_SIMPLE_LIST_H
+#define BST_SIMPLE_LIST_H
 
-#ifdef __cplusplus
-extern "C"
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <stdint.h>
+
+struct list_node
 {
-#endif
+    struct list_node *next;
+    void* p_data;
+};
 
-#include "bsx_activity_bit_identifier.h"
-#include "bsx_android.h"
-#include "bsx_constant.h"
-#include "bsx_datatypes.h"
-#include "bsx_library.h"
-#include "bsx_module_identifier.h"
-#include "bsx_physical_sensor_identifier.h"
-#include "bsx_property_set_identifier.h"
-#include "bsx_return_value_identifier.h"
-#include "bsx_user_def.h"
-#include "bsx_vector_index_identifier.h"
-#include "bsx_virtual_sensor_identifier.h"
+struct dlist_node
+{
+    struct dlist_node *prev;
+    struct dlist_node *next;
+    long data;
+};
 
-#ifdef __cplusplus
-}
-#endif
+class BoschSimpleList
+{
+public:
+    BoschSimpleList();
+    ~BoschSimpleList();
 
-#define SAMPLE_RATE_DISABLED 65535.f
-#define BST_DLOG_ID_START 256
-#define BST_DLOG_ID_SUBSCRIBE_OUT BST_DLOG_ID_START
-#define BST_DLOG_ID_SUBSCRIBE_IN (BST_DLOG_ID_START+1)
-#define BST_DLOG_ID_DOSTEP (BST_DLOG_ID_START+2)
-#define BST_DLOG_ID_ABANDON (BST_DLOG_ID_START+3)
-#define BST_DLOG_ID_NEWSAMPLE (BST_DLOG_ID_START+4)
+    void set_uplimit(uint32_t limit);
+    int list_add_rear(void *pdata);
+    void list_get_headdata(void **ppdata);
+    int list_mount_rear(BoschSimpleList *list_for_mnt);
+    int list_clean();
 
-extern int sensord_bsx_init(void);
+    struct list_node *head;
+    struct list_node *tail;
+    uint32_t list_len;
 
-extern void sensord_algo_process(BoschSensor *boschsensor);
-extern bsx_return_t sensord_update_subscription(
-                            bsx_sensor_configuration_t *const virtual_sensor_config_p,
-                            bsx_u32_t *const n_virtual_sensor_config_p,
-                            bsx_sensor_configuration_t *const physical_sensor_config_p,
-                            bsx_u32_t *const n_physical_sensor_config_p,
-                            uint32_t cur_active_cnt);
-extern uint8_t sensord_resample5to4(int32_t data[3], int64_t *tm,  int32_t pre_data[3], int64_t *pre_tm, uint32_t counter);
+private:
+    uint32_t uplimit;
+};
 
 #endif

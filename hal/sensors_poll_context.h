@@ -34,5 +34,5 @@ struct sensors_poll_context_t
 #endif
 
 private:
-    BstSensor *bst_sensor;
+    BoschSensor *bosch_sensor;
 };

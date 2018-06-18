@@ -3,6 +3,8 @@
  *
  * (C) Copyright 2011~2015 Bosch Sensortec GmbH All Rights Reserved
  *
+ * (C) Modification Copyright 2018 Robert Bosch Kft  All Rights Reserved
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,38 +18,69 @@
  * limitations under the License.
  *
  *------------------------------------------------------------------------------
- *  Disclaimer
+ * Disclaimer
  *
- * Common: Bosch Sensortec products are developed for the consumer goods
- * industry. They may only be used within the parameters of the respective valid
- * product data sheet.  Bosch Sensortec products are provided with the express
- * understanding that there is no warranty of fitness for a particular purpose.
- * They are not fit for use in life-sustaining, safety or security sensitive
- * systems or any system or device that may lead to bodily harm or property
- * damage if the system or device malfunctions. In addition, Bosch Sensortec
- * products are not fit for use in products which interact with motor vehicle
- * systems.  The resale and/or use of products are at the purchaser's own risk
- * and his own responsibility. The examination of fitness for the intended use
- * is the sole responsibility of the Purchaser.
+ * Common:
  *
- * The purchaser shall indemnify Bosch Sensortec from all third party claims,
- * including any claims for incidental, or consequential damages, arising from
- * any product use not covered by the parameters of the respective valid product
- * data sheet or not approved by Bosch Sensortec and reimburse Bosch Sensortec
- * for all costs in connection with such claims.
+ * Assessment of Products Returned from Field
+ *
+ * Returned products are considered good if they fulfill the specifications / 
+ * test data for 0-mileage and field listed in this document.
+ *
+ * Engineering Samples
+ * 
+ * Engineering samples are marked with (e) or (E). Samples may vary from the
+ * valid technical specifications of the series product contained in this
+ * data sheet. Therefore, they are not intended or fit for resale to
+ * third parties or for use in end products. Their sole purpose is internal
+ * client testing. The testing of an engineering sample may in no way replace
+ * the testing of a series product. Bosch assumes no liability for the use
+ * of engineering samples. The purchaser shall indemnify Bosch from all claims
+ * arising from the use of engineering samples.
+ *
+ * Intended use
+ *
+ * Provided that SMI130 is used within the conditions (environment, application,
+ * installation, loads) as described in this TCD and the corresponding
+ * agreed upon documents, Bosch ensures that the product complies with
+ * the agreed properties. Agreements beyond this require
+ * the written approval by Bosch. The product is considered fit for the intended
+ * use when the product successfully has passed the tests
+ * in accordance with the TCD and agreed upon documents.
+ *
+ * It is the responsibility of the customer to ensure the proper application
+ * of the product in the overall system/vehicle.
+ *
+ * Bosch does not assume any responsibility for changes to the environment
+ * of the product that deviate from the TCD and the agreed upon documents 
+ * as well as all applications not released by Bosch
+  *
+ * The resale and/or use of products are at the purchaser’s own risk and 
+ * responsibility. The examination and testing of the SMI130 
+ * is the sole responsibility of the purchaser.
+ *
+ * The purchaser shall indemnify Bosch from all third party claims 
+ * arising from any product use not covered by the parameters of 
+ * this product data sheet or not approved by Bosch and reimburse Bosch 
+ * for all costs and damages in connection with such claims.
  *
  * The purchaser must monitor the market for the purchased products,
- * particularly with regard to product safety and inform Bosch Sensortec without
- * delay of all security relevant incidents.
+ * particularly with regard to product safety, and inform Bosch without delay
+ * of all security relevant incidents.
  *
- * Engineering Samples are marked with an asterisk (*) or (e). Samples may vary
- * from the valid technical specifications of the product series. They are
- * therefore not intended or fit for resale to third parties or for use in end
- * products. Their sole purpose is internal client testing. The testing of an
- * engineering sample may in no way replace the testing of a product series.
- * Bosch Sensortec assumes no liability for the use of engineering samples. By
- * accepting the engineering samples, the Purchaser agrees to indemnify Bosch
- * Sensortec from all claims arising from the use of engineering samples.
+ * Application Examples and Hints
+ *
+ * With respect to any application examples, advice, normal values
+ * and/or any information regarding the application of the device,
+ * Bosch hereby disclaims any and all warranties and liabilities of any kind,
+ * including without limitation warranties of
+ * non-infringement of intellectual property rights or copyrights
+ * of any third party.
+ * The information given in this document shall in no event be regarded 
+ * as a guarantee of conditions or characteristics. They are provided
+ * for illustrative purposes only and no evaluation regarding infringement
+ * of intellectual property rights or copyrights or regarding functionality,
+ * performance or error has been made.
  *
  * Special: This software module (hereinafter called "Software") and any
  * information on application-sheets (hereinafter called "Information") is
@@ -78,6 +111,8 @@
  * @date         "Tue Jan 26 11:14:07 2016 +0800"
  * @commit       "c6abe62"
  *
+ * @modification date         "Thu May 3 12:23:56 2018 +0100"
+ *
  * @brief
  *
  * @detail
@@ -95,7 +130,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#include "BstSensor.h"
+#include "BoschSensor.h"
 #include "bsx_android.h"
 #include "bsx_datatypes.h"
 
@@ -127,7 +162,7 @@ uint8_t HAL_ver[4] = { 4, 0, 0, 32 };
 	}
 
 //map with enum BSX4_SENSORLIST_INX
-struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
+struct sensor_t bosch_all_sensors[SENSORLIST_INX_END] = {
 	{	.name = "BOSCH GAS Resist Sensor",
 		.vendor = "Bosch",
 		.version = 1,
@@ -1000,7 +1035,7 @@ struct sensor_t bst_all_sensors[SENSORLIST_INX_END] = {
 ,
 };
 
-BST_SENSORLIST bst_sensorlist = { NULL, NULL, 0 };
+BST_SENSORLIST bosch_sensorlist = { NULL, NULL, 0 };
 uint32_t active_nonwksensor_cnt = 0;
 uint32_t active_wksensor_cnt = 0;
 
@@ -1009,27 +1044,27 @@ void get_sensor_t(int32_t sensor_id, struct sensor_t **pp_sensor_t, int32_t *p_l
     uint32_t i;
     struct sensor_t *p_sensor = NULL;
 
-    for (i = 0; i < bst_sensorlist.list_len; i++)
+    for (i = 0; i < bosch_sensorlist.list_len; i++)
     {
-        if (NULL == bst_sensorlist.list[i].name)
+        if (NULL == bosch_sensorlist.list[i].name)
         {
             //NULL == name means sensor is not supported so that structure is unuseful
             continue;
         }
         else
         {
-            if (sensor_id == bst_sensorlist.list[i].handle)
+            if (sensor_id == bosch_sensorlist.list[i].handle)
             {
-                p_sensor = &(bst_sensorlist.list[i]);
+                p_sensor = &(bosch_sensorlist.list[i]);
                 break;
             }
         }
     }
 
-    if (i != bst_sensorlist.list_len)
+    if (i != bosch_sensorlist.list_len)
     {
         *pp_sensor_t = p_sensor;
-        *p_list_inx = bst_sensorlist.bsx_list_index[i];
+        *p_list_inx = bosch_sensorlist.bsx_list_index[i];
     }
     else
     {
@@ -1595,13 +1630,13 @@ void *hwcntl_main(void *arg)
 {
     int ret;
 
-    BstSensor *bst_sensor = reinterpret_cast<BstSensor *>(arg);
+    BoschSensor *bosch_sensor = reinterpret_cast<BoschSensor *>(arg);
 
-    if(bst_sensor->pfun_hw_deliver_sensordata)
+    if(bosch_sensor->pfun_hw_deliver_sensordata)
     {
         while (1)
         {
-            bst_sensor->pfun_hw_deliver_sensordata(bst_sensor);
+            bosch_sensor->pfun_hw_deliver_sensordata(bosch_sensor);
         }
     }
 

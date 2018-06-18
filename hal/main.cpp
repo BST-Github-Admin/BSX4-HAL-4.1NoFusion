@@ -24,7 +24,7 @@
 #include <pthread.h>
 #include <poll.h>
 
-#include "BstSensor.h"
+#include "BoschSensor.h"
 #include "bsx_android.h"
 
 #include "sensors_poll_context.h"
@@ -54,8 +54,8 @@ static int sensors__set_operation_mode(unsigned int mode)
 
 sensors_poll_context_t::sensors_poll_context_t()
 {
-    bst_sensor = BstSensor::getInstance();
-    sensorsNum = bst_sensor->get_sensorlist(&sSensorList);
+    bosch_sensor = BoschSensor::getInstance();
+    sensorsNum = bosch_sensor->get_sensorlist(&sSensorList);
 }
 
 //for cppcheck "noCopyConstructor"
@@ -66,42 +66,42 @@ sensors_poll_context_t::sensors_poll_context_t(const sensors_poll_context_t & ot
 
 sensors_poll_context_t::~sensors_poll_context_t()
 {
-    BstSensor::destroy();
+    BoschSensor::destroy();
 }
 
 int sensors_poll_context_t::activate(int handle, int enabled)
 {
-    return bst_sensor->activate(handle, enabled);
+    return bosch_sensor->activate(handle, enabled);
 }
 
 int sensors_poll_context_t::setDelay(int handle, int64_t ns)
 {
-    return bst_sensor->setDelay(handle, ns);
+    return bosch_sensor->setDelay(handle, ns);
 }
 
 int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
 {
     int nbEvents = 0;
     int n = 0;
-    int bst_evncnt = 0;
+    int bosch_evncnt = 0;
     struct pollfd extended_mPollFds[1];
 
-    extended_mPollFds[0].fd = bst_sensor->HALpipe_fd[0];
+    extended_mPollFds[0].fd = bosch_sensor->HALpipe_fd[0];
     extended_mPollFds[0].events = POLLIN;
     extended_mPollFds[0].revents = 0;
 
     do {
         // see if we have some leftover from the last poll()
         if(extended_mPollFds[0].revents & POLLIN){
-            bst_evncnt = bst_sensor->read_events(data, count);
+            bosch_evncnt = bosch_sensor->read_events(data, count);
 
-            if (bst_evncnt < count) {
+            if (bosch_evncnt < count) {
                 // no more data for next time
                 extended_mPollFds[0].revents = 0;
             }
-            count -= bst_evncnt;
-            nbEvents += bst_evncnt;
-            data += bst_evncnt;
+            count -= bosch_evncnt;
+            nbEvents += bosch_evncnt;
+            data += bosch_evncnt;
         }
 
         if (count) {
@@ -124,18 +124,18 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
 
 int sensors_poll_context_t::batch(int handle, int flags, int64_t sampling_period_ns, int64_t max_report_latency_ns)
 {
-    return bst_sensor->batch(handle, flags, sampling_period_ns, max_report_latency_ns);
+    return bosch_sensor->batch(handle, flags, sampling_period_ns, max_report_latency_ns);
 }
 
 int sensors_poll_context_t::flush(int handle)
 {
-    return bst_sensor->flush(handle);
+    return bosch_sensor->flush(handle);
 }
 
 #if defined(SENSORS_DEVICE_API_VERSION_1_4)
 int sensors_poll_context_t::inject_sensor_data(const sensors_event_t *data)
 {
-    return bst_sensor->inject_sensor_data(data);
+    return bosch_sensor->inject_sensor_data(data);
 }
 #endif
 
